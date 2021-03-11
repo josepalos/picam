@@ -1,52 +1,59 @@
 # -*- coding: utf-8 -*-
+import logging
 import queue
 import sys
 
-import cv2
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
 import mainwindow
-
+from virtualcamera import Camera
 
 class Window(QMainWindow, mainwindow.Ui_MainWindow):
-    def __init__(self):
+    def __init__(self, camera: Camera):
         super().__init__()
         self.setupUi(self)
-        self.count = 0
 
-        self.btnPressMe.clicked.connect(self.pressed_press_me_button)
-        self.btnShowImg.clicked.connect(lambda: self.set_image("potato.jpg"))
+        self.camera = camera
+        self.preview_enabled = False
 
-    def pressed_press_me_button(self):
-        self.labelMain.setText(f"{self.count}")
-        self.count += 1
+        self.btnShutter.clicked.connect(self.pressed_shutter)
+        self.btnTogglePreview.clicked.connect(self.toggle_preview)
 
-    def set_image(self, img_path):
-        rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
-        h, w, ch = rgb_image.shape
+        self.comboboxIso.currentTextChanged.connect(lambda val: self.camera.set_iso(int(val)))
+        self.comboboxDelay.currentTextChanged.connect(lambda val: self.camera.set_delay(int(val)))
+        self.spinboxBrightness.valueChanged.connect(lambda val: self.camera.set_brightness(int(val)))
+        self.spinboxContrast.valueChanged.connect(lambda val: self.camera.set_contrast(int(val)))
+        self.spinboxShutterSpeed.valueChanged.connect(lambda val: self.camera.set_shutter_speed(int(val)))
 
-        bytes_per_line = ch * w
-        convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h,
-                                            bytes_per_line,
-                                            QtGui.QImage.Format_RGB888)
-        p = convert_to_Qt_format.scaled(self.display_width,
-                                        self.display_height,
-                                        Qt.KeepAspectRatio)
+    def pressed_shutter(self):
+        self.camera.take_picture()
+        # TODO show in the image frame the last taken image
 
-        img = QtGui.QPixmap.fromImage(p)
-        self.labelMain.setPixmap(img)
+    def toggle_preview(self):
+        self.preview_enabled = not self.preview_enabled
 
+        if self.preview_enabled:
+            image = self.camera.get_image()
+            qt_image = image.as_qtimage()
+            pixmap = QtGui.QPixmap.fromImage(qt_image)
+            self.labelImg.setPixmap(pixmap)
+        else:
+            self.labelImg.setText("Preview disabled")
+    
 
-def window():
+def window(camera: Camera):
     app = QApplication(sys.argv)
-    window = Window()
+    window = Window(camera)
+
     window.show()
     sys.exit(app.exec_())
 
 
 def main():
-    window()
+    logging.basicConfig(level=logging.DEBUG)
+    camera = Camera()
+    window(camera)
 
 
 if __name__ == "__main__":

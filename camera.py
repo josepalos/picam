@@ -61,7 +61,16 @@ class Camera:
         image = self._raw_capture.array
 
         return Image(image)
-
+    
+    def preview(self):
+        for frame in self._camera.capture_continuous(self._raw_capture,
+                                                     format="bgr",
+                                                     use_video_port=True)
+            image = Image(frame.array)
+            # clear the stream for the next frame
+            self._raw_capture.truncate(0)
+            yield image
+            
     def close(self):
         self._camera.close()
 

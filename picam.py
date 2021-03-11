@@ -1,20 +1,12 @@
 # -*- coding: utf-8 -*-
+import queue
 import sys
 
-from PyQt5 import QtWidgets
+import cv2
+from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
-WIDTH = 800
-HEIGHT = 480
-
 import mainwindow
-
-class Camera:
-    def __init__(self, cam_num):
-        self.cam_num = cam_num
-
-    def grab_images(self, queue):
-        cap = cv2.VideoCapture(self.cam-num - 1 + CAP_API)
 
 
 class Window(QMainWindow, mainwindow.Ui_MainWindow):
@@ -23,11 +15,27 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         self.setupUi(self)
         self.count = 0
 
-        self.pressMeButton.clicked.connect(self.pressed_press_me_button)
+        self.btnPressMe.clicked.connect(self.pressed_press_me_button)
+        self.btnShowImg.clicked.connect(lambda: self.set_image("potato.jpg"))
 
     def pressed_press_me_button(self):
-        self.mainLabel.setText(f"{self.count}")
+        self.labelMain.setText(f"{self.count}")
         self.count += 1
+
+    def set_image(self, img_path):
+        rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+        h, w, ch = rgb_image.shape
+
+        bytes_per_line = ch * w
+        convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h,
+                                            bytes_per_line,
+                                            QtGui.QImage.Format_RGB888)
+        p = convert_to_Qt_format.scaled(self.display_width,
+                                        self.display_height,
+                                        Qt.KeepAspectRatio)
+
+        img = QtGui.QPixmap.fromImage(p)
+        self.labelMain.setPixmap(img)
 
 
 def window():
@@ -37,5 +45,9 @@ def window():
     sys.exit(app.exec_())
 
 
-if __name__ == "__main__":
+def main():
     window()
+
+
+if __name__ == "__main__":
+    main()

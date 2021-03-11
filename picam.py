@@ -3,8 +3,9 @@ import logging
 import queue
 import sys
 
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtCore import Qt
 
 import mainwindow
 from virtualcamera import Camera
@@ -26,6 +27,9 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         self.spinboxContrast.valueChanged.connect(lambda val: self.camera.set_contrast(int(val)))
         self.spinboxShutterSpeed.valueChanged.connect(lambda val: self.camera.set_shutter_speed(int(val)))
 
+    def preview_window_dimensions(self):
+        return self.labelImg.width(), self.labelImg.height()
+
     def pressed_shutter(self):
         self.camera.take_picture()
         # TODO show in the image frame the last taken image
@@ -37,6 +41,10 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
             image = self.camera.get_image()
             qt_image = image.as_qtimage()
             pixmap = QtGui.QPixmap.fromImage(qt_image)
+
+            width, height = self.preview_window_dimensions()
+            pixmap = pixmap.scaled(width, height, Qt.KeepAspectRatio)
+
             self.labelImg.setPixmap(pixmap)
         else:
             self.labelImg.setText("Preview disabled")

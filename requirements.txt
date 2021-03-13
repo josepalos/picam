@@ -1,2 +1,2 @@
 pyqt5
-# picamera[array]
+picamera[array]

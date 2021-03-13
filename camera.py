@@ -1,7 +1,8 @@
+import logging
 import time
 
 import cv2
-from picamera import Picamera
+from picamera import PiCamera
 from picamera.array import PiRGBArray
 from PyQt5 import QtGui
 
@@ -21,8 +22,10 @@ class Image:
 
 class Camera:
     def __init__(self):
-        self._camera = Picamera()
-        self._raw_capture = PiRGBArray(self._camera)
+        self._camera = PiCamera()
+        self._camera.resolution = (480, 320)
+        self._camera.framerate = 15
+        self._raw_capture = PiRGBArray(self._camera, size=self._camera.resolution)
         self._delay = 0
 
     def get_image(self) -> Image:
@@ -65,7 +68,7 @@ class Camera:
     def preview(self):
         for frame in self._camera.capture_continuous(self._raw_capture,
                                                      format="bgr",
-                                                     use_video_port=True)
+                                                     use_video_port=True):
             image = Image(frame.array)
             # clear the stream for the next frame
             self._raw_capture.truncate(0)
@@ -76,12 +79,13 @@ class Camera:
 
 
 if __name__ == "__main__":
+    cam = Camera()
 
-    camera = Camera()
-    time.sleep(0.1)  # warmup camera
-    
-    img = camera.take_picture()
-    cv2.imgshow("Image", img._image)
-    cv2.waitKey(0)
-    camera.close()
+    time.sleep(0.1)
+
+    for i, image in enumerate(cam.preview()):
+        print("New frame %d" % i)
+        cv2.imshow("Frame", image._image)
+        cv2.waitKey(1)
+    cam.close()
 

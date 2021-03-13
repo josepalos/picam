@@ -32,7 +32,7 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         self.comboboxDelay.currentTextChanged.connect(lambda val: self.camera.set_delay(int(val)))
         self.spinboxBrightness.valueChanged.connect(lambda val: self.camera.set_brightness(int(val)))
         self.spinboxContrast.valueChanged.connect(lambda val: self.camera.set_contrast(int(val)))
-        self.spinboxShutterSpeed.valueChanged.connect(lambda val: self.camera.set_shutter_speed(int(val)))
+        self.comboboxShutterSpeed.currentTextChanged.connect(lambda val: self.camera.set_shutter_speed(val))
 
     def _threaded_capture(self):
         for frame in self.camera.preview():

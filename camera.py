@@ -44,9 +44,16 @@ class Camera:
         logging.getLogger(__name__).debug("Set contrast value to %d", value)
         self._camera.contrast = value
 
-    def set_shutter_speed(self, value: int):
-        logging.getLogger(__name__).debug("Set shutter speed value to %d", value)
-        self._camera.shutter_speed = value
+    def set_shutter_speed(self, value: str):
+        if "/" in value:
+            denom = int(value.split("/")[1])
+            microseconds = int(1000000 / denom)
+        else:
+            seconds = float(value)
+            microseconds = int(seconds * 1000000)
+        logging.getLogger(__name__).debug("Set shutter speed value to %s (%d)",
+                                          value, microseconds)
+        self._camera.shutter_speed = microseconds
 
     def set_delay(self, value: int):
         logging.getLogger(__name__).debug("Set delay value to %d", value)

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
+import os
+import os.path
 import queue
+import re
 import sys
 import threading
 
@@ -12,12 +15,48 @@ import mainwindow
 from camera import Camera
 
 
+IMAGES_DIRECTORY = "./images"
+
+
+class Storage:
+    def __init__(self, path, extension, num_digits: int = 4):
+        self.path = path
+        self.extension = extension
+        self._next_id = None
+        self._num_digits = num_digits
+
+    def start(self):
+        os.makedirs(self.path, exist_ok=True)
+        self._set_next_img_id()
+
+    def _set_next_img_id(self):
+        self._next_id = 0
+        files = [f for f in os.listdir(self.path) if os.path.isfile(os.path.join(self.path, f))]
+        img_regex = re.compile(f"IMG(\d+)\.{self.extension}")
+        for f in files:
+            if img_regex.match(f):
+                img_id = int(img_regex.match(f).group(1))
+                self._next_id = max(self._next_id, img_id + 1)
+
+        if self._next_id != 0:
+            logging.getLogger(__name__).info("Storage has found existing images, starting at id %d", self._next_id)
+        else:
+            logging.getLogger(__name__).info("Storage has not found any image. Starting at id 0")
+
+    def get_new_name(self):
+        img_name = f"IMG{self._next_id:0{self._num_digits}}.{self.extension}"
+        self._next_id += 1
+        return os.path.join(self.path, img_name)
+
+
+
 class Window(QMainWindow, mainwindow.Ui_MainWindow):
-    def __init__(self, camera: Camera):
+    def __init__(self, camera: Camera, storage: Storage):
         super().__init__()
         self.setupUi(self)
 
         self.camera = camera
+        self.storage = storage
 
         self.previewing = False
         self.preview_timer = QTimer(self)
@@ -45,7 +84,8 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         return self.labelImg.width(), self.labelImg.height()
 
     def pressed_shutter(self):
-        self.camera.take_picture()
+        filename = self.storage.get_new_name()
+        image = self.camera.take_picture(filename)
         # TODO show in the image frame the last taken image
 
     def toggle_preview(self):
@@ -79,9 +119,9 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
 
     
 
-def window(camera: Camera):
+def window(camera: Camera, storage: Storage):
     app = QApplication(sys.argv)
-    window = Window(camera)
+    window = Window(camera, storage)
 
     window.showFullScreen()
     sys.exit(app.exec_())
@@ -90,7 +130,9 @@ def window(camera: Camera):
 def main():
     logging.basicConfig(level=logging.DEBUG)
     camera = Camera()
-    window(camera)
+    storage = Storage(IMAGES_DIRECTORY, "raw")
+    storage.start()
+    window(camera, storage)
 
     camera.close()
 

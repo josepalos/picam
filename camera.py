@@ -19,6 +19,9 @@ class Image:
         return QtGui.QImage(rgb_image.data, w, h, bytes_per_line,
                             QtGui.QImage.Format_RGB888)
 
+    def save(self, filename):
+        print(self._image)
+
 
 class Camera:
     def __init__(self):
@@ -63,14 +66,11 @@ class Camera:
         logging.getLogger(__name__).debug("Set led value to %d", value)
         self._camera.led = value
 
-    def take_picture(self) -> Image:
+    def take_picture(self, filename: str):
         logging.getLogger(__name__).debug("Take new picture")
-
         time.sleep(self._delay)
-        self._camera.capture(self._raw_capture, format="bgr")
-        image = self._raw_capture.array
-
-        return Image(image)
+        self._camera.capture(filename, format="bgr")
+        logging.getLogger(__name__).info("Image saved at %s", filename)
     
     def preview(self):
         for frame in self._camera.capture_continuous(self._raw_capture,
@@ -89,7 +89,6 @@ if __name__ == "__main__":
     cam = Camera()
 
     time.sleep(0.1)
-
     for i, image in enumerate(cam.preview()):
         print("New frame %d" % i)
         cv2.imshow("Frame", image._image)

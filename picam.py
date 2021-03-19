@@ -5,6 +5,7 @@ import os.path
 import queue
 import re
 import sys
+import time
 import threading
 
 from PyQt5 import QtWidgets, QtGui
@@ -51,11 +52,12 @@ class Storage:
 
 
 class Window(QMainWindow, mainwindow.Ui_MainWindow):
-    def __init__(self, camera: Camera, storage: Storage):
+    def __init__(self, cam: Camera, storage: Storage):
         super().__init__()
         self.setupUi(self)
 
-        self.camera = camera
+        self.cam = cam
+        logging.getLogger(__name__).info("Camera exposure speed is: %s", self.cam._camera.exposure_speed)
         self.storage = storage
 
         self.previewing = False
@@ -67,14 +69,14 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         self.btnShutter.clicked.connect(self.pressed_shutter)
         self.btnTogglePreview.clicked.connect(self.toggle_preview)
 
-        self.comboboxIso.currentTextChanged.connect(lambda val: self.camera.set_iso(int(val)))
-        self.comboboxDelay.currentTextChanged.connect(lambda val: self.camera.set_delay(int(val)))
-        self.spinboxBrightness.valueChanged.connect(lambda val: self.camera.set_brightness(int(val)))
-        self.spinboxContrast.valueChanged.connect(lambda val: self.camera.set_contrast(int(val)))
-        self.comboboxShutterSpeed.currentTextChanged.connect(lambda val: self.camera.set_shutter_speed(val))
+        self.comboboxIso.currentTextChanged.connect(lambda val: self.cam.set_iso(int(val)))
+        self.comboboxDelay.currentTextChanged.connect(lambda val: self.cam.set_delay(int(val)))
+        self.spinboxBrightness.valueChanged.connect(lambda val: self.cam.set_brightness(int(val)))
+        self.spinboxContrast.valueChanged.connect(lambda val: self.cam.set_contrast(int(val)))
+        self.comboboxShutterSpeed.currentTextChanged.connect(lambda val: self.cam.set_shutter_speed(val))
 
     def _threaded_capture(self):
-        for frame in self.camera.preview():
+        for frame in self.cam.preview():
             self.preview_queue.put(frame)
 
             if not self.previewing:
@@ -85,7 +87,7 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
 
     def pressed_shutter(self):
         filename = self.storage.get_new_name()
-        image = self.camera.take_picture(filename)
+        image = self.cam.take_picture(filename)
         # TODO show in the image frame the last taken image
 
     def toggle_preview(self):
@@ -119,22 +121,23 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
 
     
 
-def window(camera: Camera, storage: Storage):
+def window(cam: Camera, storage: Storage):
     app = QApplication(sys.argv)
-    window = Window(camera, storage)
+    window = Window(cam, storage)
 
     window.showFullScreen()
-    sys.exit(app.exec_())
+
+    return app.exec_()
 
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
-    camera = Camera()
-    storage = Storage(IMAGES_DIRECTORY, "raw")
+    storage = Storage(IMAGES_DIRECTORY, "png")
     storage.start()
-    window(camera, storage)
 
-    camera.close()
+    with Camera() as cam:
+        exit_code = window(cam, storage)
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+from fractions import Fraction
 import logging
 import time
 
@@ -19,21 +20,46 @@ class Image:
         return QtGui.QImage(rgb_image.data, w, h, bytes_per_line,
                             QtGui.QImage.Format_RGB888)
 
-    def save(self, filename):
-        print(self._image)
-
 
 class Camera:
-    def __init__(self):
-        self._camera = PiCamera()
-        self._camera.resolution = (480, 320)
-        self._camera.framerate = 15
-        self._raw_capture = PiRGBArray(self._camera, size=self._camera.resolution)
+    def __init__(self, resolution=None, framerate=None):
+        self._camera = None
+        self._raw_capture = None
+        self._resolution = resolution
+        self._framerate = framerate
         self._delay = 0
 
-    def get_image(self) -> Image:
-        logging.getLogger(__name__).debug("Get the image potato.jpg")
-        return Image("potato.jpg")
+    def open(self):
+        framerate = self._framerate
+        if not framerate:
+            framerate = 30
+        self._camera = PiCamera(resolution=self._resolution,
+                                framerate=framerate,
+                                sensor_mode=0)
+        self._raw_capture = PiRGBArray(self._camera)
+        self.unfix_automatic_settings()
+        self.shutter_speed = 0  # auto
+
+        time.sleep(0.1)  # warm up
+
+    def close(self):
+        self._camera.close()
+        self._camera = None
+        self._raw_capture = None
+
+    def __enter__(self):
+        self.open()
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self.close()
+
+    def fix_automatic_settings(self):
+        self._camera.exposure_mode = "off"
+
+    def unfix_automatic_settings(self):
+        self._camera.exposure_mode = "auto"
+
 
     def set_iso(self, value: int):
         logging.getLogger(__name__).debug("Set iso value to %d", value)
@@ -54,6 +80,14 @@ class Camera:
         else:
             seconds = float(value)
             microseconds = int(seconds * 1000000)
+
+        if 1000000 / self._camera.framerate < microseconds:
+            logging.getLogger(__name__).warning("Framerate is too fast for this shutter speed")
+            if self._framerate is None:
+                new_framerate = Fraction(1000000/microseconds)
+                logging.getLogger(__name__).info("Changing the framerate to be %s", new_framerate)
+                self._camera.framerate = new_framerate
+
         logging.getLogger(__name__).debug("Set shutter speed value to %s (%d)",
                                           value, microseconds)
         self._camera.shutter_speed = microseconds
@@ -69,8 +103,11 @@ class Camera:
     def take_picture(self, filename: str):
         logging.getLogger(__name__).debug("Take new picture")
         time.sleep(self._delay)
-        self._camera.capture(filename, format="bgr")
+        start = time.time()
+        self._camera.capture(filename)
+        end = time.time()
         logging.getLogger(__name__).info("Image saved at %s", filename)
+        logging.getLogger(__name__).debug("Image took %d seconds", end - start)
     
     def preview(self):
         for frame in self._camera.capture_continuous(self._raw_capture,
@@ -81,17 +118,3 @@ class Camera:
             self._raw_capture.truncate(0)
             yield image
             
-    def close(self):
-        self._camera.close()
-
-
-if __name__ == "__main__":
-    cam = Camera()
-
-    time.sleep(0.1)
-    for i, image in enumerate(cam.preview()):
-        print("New frame %d" % i)
-        cv2.imshow("Frame", image._image)
-        cv2.waitKey(1)
-    cam.close()
-

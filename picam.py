@@ -93,6 +93,10 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         self.spinboxBrightness.valueChanged.connect(lambda val: self.cam.set_brightness(int(val)))
         self.spinboxContrast.valueChanged.connect(lambda val: self.cam.set_contrast(int(val)))
         self.comboboxShutterSpeed.currentTextChanged.connect(lambda val: self.cam.set_shutter_speed(val))
+        self.checkboxLed.stateChanged.connect(self.set_led)
+
+    def set_led(self, value):
+        self.cam.set_led(bool(value))
 
     def _threaded_capture(self):
         for frame in self.cam.preview():
@@ -105,6 +109,8 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         return self.labelImg.width(), self.labelImg.height()
 
     def pressed_shutter(self):
+        if self.previewing:
+            self.toggle_preview()
         filename = self.storage.get_new_name()
 
         # create the qthread and the worker

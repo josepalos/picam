@@ -63,7 +63,6 @@ class Camera:
     def unfix_automatic_settings(self):
         self._camera.exposure_mode = "auto"
 
-
     def set_iso(self, value: int):
         logging.getLogger(__name__).debug("Set iso value to %d", value)
         self._camera.iso = value
@@ -100,7 +99,7 @@ class Camera:
         self._delay = value
 
     def set_led(self, value: bool):
-        logging.getLogger(__name__).debug("Set led value to %d", value)
+        logging.getLogger(__name__).debug("Set led value to %s", value)
         self._camera.led = value
 
     def take_picture(self, filename: str):

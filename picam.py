@@ -10,7 +10,7 @@ import threading
 
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer, QObject, QThread, pyqtSignal
 
 import mainwindow
 from camera import Camera
@@ -50,6 +50,19 @@ class Storage:
         return os.path.join(self.path, img_name)
 
 
+class ShutterWorker(QObject):
+    finished = pyqtSignal()
+
+    def __init__(self, camera, filename):
+        super().__init__()
+        self.camera = camera
+        self.filename = filename
+
+    def run(self):
+        self.camera.take_picture(self.filename)
+        self.finished.emit()
+        
+
 
 class Window(QMainWindow, mainwindow.Ui_MainWindow):
     def __init__(self, cam: Camera, storage: Storage):
@@ -65,6 +78,9 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         self.preview_timer.timeout.connect(self.show_preview_image)
         self.preview_queue = queue.Queue()
         self.preview_thread = None
+
+        self._shutter_thread = None
+        self._shutter_worker = None
 
         self.btnShutter.clicked.connect(self.pressed_shutter)
         self.btnTogglePreview.clicked.connect(self.toggle_preview)
@@ -87,7 +103,26 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
 
     def pressed_shutter(self):
         filename = self.storage.get_new_name()
-        image = self.cam.take_picture(filename)
+
+        # create the qthread and the worker
+        self._shutter_thread = QThread()
+        self._shutter_worker = ShutterWorker(self.cam, filename)
+        # move the worker to the thread
+        self._shutter_worker.moveToThread(self._shutter_thread)
+
+        # connect signals and slots
+        self._shutter_thread.started.connect(self._shutter_worker.run)
+        self._shutter_worker.finished.connect(self._shutter_thread.quit)
+        self._shutter_worker.finished.connect(self._shutter_worker.deleteLater)
+        self._shutter_thread.finished.connect(self._shutter_thread.deleteLater)
+
+        # run the thread
+        self._shutter_thread.start()
+        
+        # disable the button until the thread finishes
+        self.btnShutter.setEnabled(False)
+        self._shutter_thread.finished.connect(lambda: self.btnShutter.setEnabled(True))
+
         # TODO show in the image frame the last taken image
 
     def toggle_preview(self):

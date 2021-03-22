@@ -19,7 +19,10 @@ class Image:
         bytes_per_line = ch * w
         return QtGui.QImage(rgb_image.data, w, h, bytes_per_line,
                             QtGui.QImage.Format_RGB888)
-
+    @staticmethod
+    def from_file(filename):
+        cv2_img = cv2.imread(filename)
+        return Image(cv2_img)
 
 class Camera:
     def __init__(self, resolution=None, framerate=None):

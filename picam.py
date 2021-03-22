@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtCore import Qt, QTimer, QObject, QThread, pyqtSignal
 
 import mainwindow
-from camera import Camera
+from camera import Camera, Image
 
 
 IMAGES_DIRECTORY = "./images"
@@ -52,6 +52,7 @@ class Storage:
 
 class ShutterWorker(QObject):
     finished = pyqtSignal()
+    captured = pyqtSignal(Image)
 
     def __init__(self, camera, filename):
         super().__init__()
@@ -60,9 +61,9 @@ class ShutterWorker(QObject):
 
     def run(self):
         self.camera.take_picture(self.filename)
+        self.captured.emit(Image.from_file(self.filename))
         self.finished.emit()
         
-
 
 class Window(QMainWindow, mainwindow.Ui_MainWindow):
     def __init__(self, cam: Camera, storage: Storage):
@@ -78,6 +79,8 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         self.preview_timer.timeout.connect(self.show_preview_image)
         self.preview_queue = queue.Queue()
         self.preview_thread = None
+        self._hide_image_timer = QTimer(self)
+        self._hide_image_timer.timeout.connect(self._hide_image)
 
         self._shutter_thread = None
         self._shutter_worker = None
@@ -115,6 +118,8 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         self._shutter_worker.finished.connect(self._shutter_thread.quit)
         self._shutter_worker.finished.connect(self._shutter_worker.deleteLater)
         self._shutter_thread.finished.connect(self._shutter_thread.deleteLater)
+        self._shutter_worker.captured.connect(lambda img: self._display_image(img, 5))
+
 
         # run the thread
         self._shutter_thread.start()
@@ -123,13 +128,11 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         self.btnShutter.setEnabled(False)
         self._shutter_thread.finished.connect(lambda: self.btnShutter.setEnabled(True))
 
-        # TODO show in the image frame the last taken image
-
     def toggle_preview(self):
         if self.previewing:
             self.previewing = False
             self.preview_timer.stop()
-            self.labelImg.setText("Preview disabled")
+            self._hide_image()
             self.preview_thread.join()
         else:
             self.previewing = True
@@ -137,7 +140,7 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
             self.preview_thread = threading.Thread(target=self._threaded_capture)
             self.preview_thread.start()
 
-    def _display_image(self, image):
+    def _display_image(self, image, timeout=None):
         qt_image = image.as_qtimage()
         pixmap = QtGui.QPixmap.fromImage(qt_image)
 
@@ -146,6 +149,12 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
 
         self.labelImg.setPixmap(pixmap)
 
+        if timeout is not None:
+            self._hide_image_timer.start(timeout * 1000)
+    
+    def _hide_image(self):
+        self.labelImg.setText("Preview disabled")
+        self._hide_image_timer.stop()
 
     def show_preview_image(self):
         if self.preview_queue.empty():

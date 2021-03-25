@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-from queue import Queue
-import threading
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QTimer, QObject, QThread, pyqtSignal
@@ -34,29 +32,24 @@ class ImageWidget(QtWidgets.QLabel):
 
 class PreviewWorker(QObject):
     finished = pyqtSignal()
+    new_frame = pyqtSignal(Image)
 
-    def __init__(self, camera, queue):
+    def __init__(self, camera):
         super().__init__()
         self.camera = camera
-        self.queue = queue
         self._is_running = False
 
     def run(self):
         logging.getLogger(__name__).debug("Preview worker started")
         self._is_running = True
-        self._clear_queue()
 
         for frame in self.camera.preview():
             logging.getLogger(__name__).debug("New image")
-            self.queue.put(frame)
+            self.new_frame.emit(frame)
             if not self._is_running:
                 break
 
             self.finished.emit()
-
-    def _clear_queue(self):
-        while not self.queue.empty():
-            self.queue.get()
 
     def stop(self):
         self._is_running = False
@@ -70,8 +63,6 @@ class ImgViewer(QtWidgets.QWidget):
         self._fullscreen = False
         self.camera = None
 
-        self._preview_timer = QTimer(self)
-        self._preview_timer.timeout.connect(self._show_preview_image)
         self._preview_queue = None
         self._preview_thread = None
         self._preview_worker = None
@@ -112,23 +103,22 @@ class ImgViewer(QtWidgets.QWidget):
 
     def start_preview(self):
         logging.getLogger(__name__).debug("Start preview")
-        self._preview_queue = Queue()
         self._preview_thread = QThread()
-        self._preview_worker = PreviewWorker(self.camera, self._preview_queue)
+        self._preview_worker = PreviewWorker(self.camera)
         self._preview_worker.moveToThread(self._preview_thread)
         self._preview_thread.started.connect(self._preview_worker.run)
         self._preview_thread.finished.connect(self._preview_thread.deleteLater)
         self._preview_worker.finished.connect(self._preview_thread.quit)
         self._preview_worker.finished.connect(self._preview_worker.deleteLater)
+        self._preview_worker.new_frame.connect(self._image.set_image)
 
         self._preview_thread.start()
-        self._preview_timer.start()
 
     def stop_preview(self):
         logging.getLogger(__name__).debug("Stop preview")
-        self.hide_image()
-        self._preview_timer.stop()
         self._preview_worker.stop()
+        self._preview_worker.new_frame.disconnect()
+        self.hide_image()
 
     def _show_preview_image(self):
         if self._preview_queue.empty():

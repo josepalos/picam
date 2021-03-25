@@ -2,10 +2,8 @@
 import logging
 import os
 import os.path
-import queue
 import re
 import sys
-import threading
 
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtCore import Qt, QTimer, QObject, QThread, pyqtSignal

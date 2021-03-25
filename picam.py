@@ -5,15 +5,16 @@ import os.path
 import queue
 import re
 import sys
-import time
 import threading
 
-from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtCore import Qt, QTimer, QObject, QThread, pyqtSignal
 
 import mainwindow
-from camera import Camera, Image
+try:
+    from camera import Camera, Image
+except ModuleNotFoundError:
+    from virtualcamera import Camera, Image
 
 
 IMAGES_DIRECTORY = "./images"
@@ -63,7 +64,7 @@ class ShutterWorker(QObject):
         self.camera.take_picture(self.filename)
         self.captured.emit(Image.from_file(self.filename))
         self.finished.emit()
-        
+
 
 class Window(QMainWindow, mainwindow.Ui_MainWindow):
     def __init__(self, cam: Camera, storage: Storage):
@@ -71,14 +72,13 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         self.setupUi(self)
 
         self.cam = cam
-        logging.getLogger(__name__).info("Camera exposure speed is: %s", self.cam._camera.exposure_speed)
+        self.widgetImgViewer.set_camera(cam)
+        logging.getLogger(__name__).info("Camera exposure speed is: %s",
+                                         self.cam.get_exposure_speed())
         self.storage = storage
 
         self.previewing = False
-        self.preview_timer = QTimer(self)
-        self.preview_timer.timeout.connect(self.show_preview_image)
-        self.preview_queue = queue.Queue()
-        self.preview_thread = None
+
         self._hide_image_timer = QTimer(self)
         self._hide_image_timer.timeout.connect(self._hide_image)
 
@@ -95,18 +95,13 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         self.comboboxShutterSpeed.currentTextChanged.connect(lambda val: self.cam.set_shutter_speed(val))
         self.checkboxLed.stateChanged.connect(self.set_led)
 
+        self.widgetImgViewer.fullscreen.connect(lambda val: self._toggle_fullscreen(bool(val)))
+
+    def _toggle_fullscreen(self, value: bool):
+        logging.getLogger(__name__).debug("Set fullscreen to: %s", value)
+
     def set_led(self, value):
         self.cam.set_led(bool(value))
-
-    def _threaded_capture(self):
-        for frame in self.cam.preview():
-            self.preview_queue.put(frame)
-
-            if not self.previewing:
-                break
-
-    def preview_window_dimensions(self):
-        return self.labelImg.width(), self.labelImg.height()
 
     def pressed_shutter(self):
         if self.previewing:
@@ -126,7 +121,6 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         self._shutter_thread.finished.connect(self._shutter_thread.deleteLater)
         self._shutter_worker.captured.connect(lambda img: self._display_image(img, 5))
 
-
         # run the thread
         self._shutter_thread.start()
         
@@ -137,39 +131,22 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
     def toggle_preview(self):
         if self.previewing:
             self.previewing = False
-            self.preview_timer.stop()
-            self._hide_image()
-            self.preview_thread.join()
+            self.widgetImgViewer.stop_preview()
         else:
             self.previewing = True
-            self.preview_timer.start()
-            self.preview_thread = threading.Thread(target=self._threaded_capture)
-            self.preview_thread.start()
+            self.widgetImgViewer.start_preview()
 
     def _display_image(self, image, timeout=None):
-        qt_image = image.as_qtimage()
-        pixmap = QtGui.QPixmap.fromImage(qt_image)
-
-        width, height = self.preview_window_dimensions()
-        pixmap = pixmap.scaled(width, height, Qt.KeepAspectRatio)
-
-        self.labelImg.setPixmap(pixmap)
+        self.widgetImgViewer.set_image(image)
 
         if timeout is not None:
             self._hide_image_timer.start(timeout * 1000)
     
     def _hide_image(self):
-        self.labelImg.setText("Preview disabled")
+        self.widgetImgViewer.hide_image()
+        self.widgetImgViewer.set_info_message("Preview disabled")
         self._hide_image_timer.stop()
 
-    def show_preview_image(self):
-        if self.preview_queue.empty():
-            return
-
-        image = self.preview_queue.get()
-        self._display_image(image)
-
-    
 
 def window(cam: Camera, storage: Storage):
     app = QApplication(sys.argv)

@@ -30,8 +30,10 @@ class Storage:
         self._set_next_img_id()
 
     def _set_next_img_id(self):
+        logger = logging.getLogger(__name__)
         self._next_id = 0
-        files = [f for f in os.listdir(self.path) if os.path.isfile(os.path.join(self.path, f))]
+        files = [f for f in os.listdir(self.path)
+                 if os.path.isfile(os.path.join(self.path, f))]
         img_regex = re.compile(f"IMG(\d+)\.{self.extension}")
         for f in files:
             if img_regex.match(f):
@@ -39,9 +41,10 @@ class Storage:
                 self._next_id = max(self._next_id, img_id + 1)
 
         if self._next_id != 0:
-            logging.getLogger(__name__).info("Storage has found existing images, starting at id %d", self._next_id)
+            logger.info("Storage has found existing images, starting at id"
+                        " %d", self._next_id)
         else:
-            logging.getLogger(__name__).info("Storage has not found any image. Starting at id 0")
+            logger.info("Storage has not found any image. Starting at id 0")
 
     def get_new_name(self):
         img_name = f"IMG{self._next_id:0{self._num_digits}}.{self.extension}"
@@ -67,15 +70,14 @@ class ShutterWorker(QObject):
 class Window(QMainWindow, mainwindow.Ui_MainWindow):
     def __init__(self, cam: Camera, storage: Storage):
         super().__init__()
+        self._init_camera(cam)
+        self.storage = storage
+        self.previewing = False
+
+        # Setup UI
         self.setupUi(self)
 
-        self.cam = cam
         self.widgetImgViewer.set_camera(cam)
-        logging.getLogger(__name__).info("Camera exposure speed is: %s",
-                                         self.cam.get_exposure_speed())
-        self.storage = storage
-
-        self.previewing = False
 
         self._hide_image_timer = QTimer(self)
         self._hide_image_timer.timeout.connect(self._hide_image)
@@ -86,20 +88,67 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         self.btnShutter.clicked.connect(self.pressed_shutter)
         self.btnTogglePreview.clicked.connect(self.toggle_preview)
 
-        self.comboboxIso.currentTextChanged.connect(lambda val: self.cam.set_iso(int(val)))
-        self.comboboxDelay.currentTextChanged.connect(lambda val: self.cam.set_delay(int(val)))
-        self.spinboxBrightness.valueChanged.connect(lambda val: self.cam.set_brightness(int(val)))
-        self.spinboxContrast.valueChanged.connect(lambda val: self.cam.set_contrast(int(val)))
-        self.comboboxShutterSpeed.currentTextChanged.connect(lambda val: self.cam.set_shutter_speed(val))
-        self.checkboxLed.stateChanged.connect(self.set_led)
+        self.widgetImgViewer.fullscreen.connect(
+                lambda val: self._toggle_fullscreen(bool(val)))
 
-        self.widgetImgViewer.fullscreen.connect(lambda val: self._toggle_fullscreen(bool(val)))
+        # Tabs:
+        # (0) Image settings
+        self.comboboxIso.currentTextChanged.connect(
+                lambda val: self.cam.set_iso(int(val)))
+        self.sliderAwbGain.valueChanged.connect(
+                lambda v: self.cam.set_awb_gain(float(v)))
+        self.comboboxAwbMode.currentTextChanged.connect(
+                self._set_awb_mode)
+        self.sliderBrightness.valueChanged.connect(
+                lambda val: self.cam.set_brightness(int(val)))
+        self.comboboxExposure.currentTextChanged.connect(
+                self.cam.set_exposure)
+        self.comboboxShutterSpeed.currentTextChanged.connect(
+                lambda val: self.cam.set_shutter_speed(val))
+        self.comboboxDelay.currentTextChanged.connect(
+                lambda val: self.cam.set_delay(int(val)))
+        # (1) Timelapse
+        self.spinboxTimelapseDelay.valueChanged.connect(
+                lambda val: print(val))
+        self.spinboxTimelapseCount.valueChanged.connect(
+                lambda val: print(val))
+        # (2) Other
+        self.checkboxLed.stateChanged.connect(self._set_led)
+        self.checkboxDenoise.stateChanged.connect(
+                lambda val: print(val))
+        self.buttonMaxFps.clicked.connect(self.cam.maximize_fps)
+        self.comboboxImageFormat.currentTextChanged.connect(
+                lambda val: print(val))
+        self.sliderSharpness.valueChanged.connect(
+                lambda val: print(val))
+        self.sliderSaturation.valueChanged.connect(
+                lambda val: print(val))
+        self.comboboxMetermode.currentTextChanged.connect(
+                lambda val: print(val))
+        self.sliderContrast.valueChanged.connect(
+                lambda val: self.cam.set_contrast(int(val)))
+        self.comboboxDrc.currentTextChanged.connect(
+                lambda val: print(val))
+
+    def _init_camera(self, cam):
+        self.cam = cam
+        logging.getLogger(__name__).info("Camera exposure speed is: %s",
+                                         self.cam.get_exposure_speed())
+        self.cam.set_led(False)
+
+    def _set_awb_mode(self, value: str):
+        self.sliderAwbGain.setEnabled(value == "Off")
+        self.cam.set_awb_mode(value)
 
     def _toggle_fullscreen(self, value: bool):
         logging.getLogger(__name__).debug("Set fullscreen to: %s", value)
 
-    def set_led(self, value):
+    def _set_led(self, value):
         self.cam.set_led(bool(value))
+
+    def _set_denosie(self, value):
+        value = bool(value)
+        logging.getLogger(__name__).debug(f"Denoise: {value}")
 
     def pressed_shutter(self):
         if self.previewing:
@@ -117,14 +166,16 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         self._shutter_worker.finished.connect(self._shutter_thread.quit)
         self._shutter_worker.finished.connect(self._shutter_worker.deleteLater)
         self._shutter_thread.finished.connect(self._shutter_thread.deleteLater)
-        self._shutter_worker.captured.connect(lambda img: self._display_image(img, 5))
+        self._shutter_worker.captured.connect(
+                lambda img: self._display_image(img, 5))
 
         # run the thread
         self._shutter_thread.start()
         
         # disable the button until the thread finishes
         self.btnShutter.setEnabled(False)
-        self._shutter_thread.finished.connect(lambda: self.btnShutter.setEnabled(True))
+        self._shutter_thread.finished.connect(
+                lambda: self.btnShutter.setEnabled(True))
 
     def toggle_preview(self):
         if self.previewing:

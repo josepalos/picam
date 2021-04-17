@@ -57,11 +57,11 @@ class Camera:
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self.close()
 
-    def fix_automatic_settings(self):
-        self._camera.exposure_mode = "off"
+    def set_awb_gain(self, gain: float):
+        self._camera.awb_gains = gain
 
-    def unfix_automatic_settings(self):
-        self._camera.exposure_mode = "auto"
+    def set_awb_mode(self, mode: str):
+        self._camera.awb_mode = mode
 
     def set_iso(self, value: int):
         logging.getLogger(__name__).debug("Set iso value to %d", value)
@@ -74,6 +74,17 @@ class Camera:
     def set_contrast(self, value: int):
         logging.getLogger(__name__).debug("Set contrast value to %d", value)
         self._camera.contrast = value
+
+    def set_exposure(self, value):
+        self._camera.exposure_mode = value
+    
+    def maximize_fps(self):
+        current_shutter_speed = self.get_exposure_speed()
+        max_fps = Fraction(current_shutter_speed, 1000000)
+        logging.getLogger(__name__).debug("Having exposure speed of %f, the"
+                                          " maximum framerate is %s",
+                                          current_shutter_speed, max_fps)
+        self._camera.framerate = max_fps
 
     def set_shutter_speed(self, value: str):
         if "/" in value:

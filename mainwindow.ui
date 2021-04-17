@@ -53,7 +53,7 @@
      <string notr="true">QTabBar::scroller {width: 80px;}</string>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
     <property name="iconSize">
      <size>
@@ -278,7 +278,7 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QComboBox" name="comboBox_2">
+        <widget class="QComboBox" name="comboboxAwbMode">
          <item>
           <property name="text">
            <string>Off</string>
@@ -339,7 +339,7 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QSlider" name="horizontalSlider">
+        <widget class="QSlider" name="sliderAwbGain">
          <property name="maximum">
           <number>80</number>
          </property>
@@ -355,7 +355,7 @@
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QSlider" name="horizontalSlider_2">
+        <widget class="QSlider" name="sliderBrightness">
          <property name="value">
           <number>50</number>
          </property>
@@ -365,7 +365,7 @@
         </widget>
        </item>
        <item row="4" column="1">
-        <widget class="QComboBox" name="comboBox_4">
+        <widget class="QComboBox" name="comboboxExposure">
          <item>
           <property name="text">
            <string>Off</string>
@@ -458,7 +458,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QSpinBox" name="spinBox_4"/>
+        <widget class="QSpinBox" name="spinboxTimelapseDelay"/>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_5">
@@ -468,7 +468,7 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QSpinBox" name="spinBox_5">
+        <widget class="QSpinBox" name="spinboxTimelapseCount">
          <property name="minimum">
           <number>1</number>
          </property>
@@ -499,14 +499,14 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="checkBox">
+        <widget class="QCheckBox" name="checkboxDenoise">
          <property name="text">
           <string>Denoise</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="buttonMaxFps">
          <property name="text">
           <string>Force Max FPS</string>
          </property>
@@ -522,7 +522,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QComboBox" name="comboBox">
+          <widget class="QComboBox" name="comboboxImageFormat">
            <item>
             <property name="text">
              <string>JPEG</string>
@@ -599,7 +599,7 @@
           </widget>
          </item>
          <item row="4" column="1">
-          <widget class="QSlider" name="horizontalSlider_3">
+          <widget class="QSlider" name="sliderContrast">
            <property name="minimum">
             <number>-100</number>
            </property>
@@ -619,7 +619,7 @@
           </widget>
          </item>
          <item row="5" column="1">
-          <widget class="QComboBox" name="comboBox_3">
+          <widget class="QComboBox" name="comboboxDrc">
            <item>
             <property name="text">
              <string>Off</string>
@@ -643,7 +643,7 @@
           </widget>
          </item>
          <item row="3" column="1">
-          <widget class="QComboBox" name="comboBox_5">
+          <widget class="QComboBox" name="comboboxMetermode">
            <item>
             <property name="text">
              <string>Average</string>
@@ -667,7 +667,7 @@
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QSlider" name="horizontalSlider_4">
+          <widget class="QSlider" name="sliderSaturation">
            <property name="minimum">
             <number>-100</number>
            </property>
@@ -680,7 +680,7 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QSlider" name="horizontalSlider_5">
+          <widget class="QSlider" name="sliderSharpness">
            <property name="minimum">
             <number>-100</number>
            </property>

@@ -55,42 +55,27 @@ class PreviewWorker(QObject):
         self._is_running = False
 
 
-class ImgViewer(QtWidgets.QWidget):
-    fullscreen = QtCore.pyqtSignal(bool)
-
+class PreviewWidget(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._fullscreen = False
         self.camera = None
-
         self._preview_queue = None
         self._preview_thread = None
         self._preview_worker = None
-
-        # QT elements
+        self._is_running = False
+        
+        # Qt elements
         self._image = ImageWidget()
-        self._image.set_image(Image.from_file("potato.jpg"))  # TODO remove
-
-        self._buttonFullscreen = QtWidgets.QPushButton("Fullscreen")
-        self._buttonFullscreen.clicked.connect(self.toggle_fullscreen)
-
+        self._image.set_image(Image.from_file("potato.jpg"))  # TODO: remove
         self._labelInfo = QtWidgets.QLabel()
 
-        self._setup_layout()
-
-    def set_camera(self, camera):
-        self.camera = camera
-
-    def _setup_layout(self):
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self._image)
-        layout.addWidget(self._buttonFullscreen)
         layout.addWidget(self._labelInfo)
         self.setLayout(layout)
 
-    def toggle_fullscreen(self):
-        self.fullscreen.emit(self._fullscreen)
-        self._fullscreen = not self._fullscreen
+    def set_camera(self, cam):
+        self.camera = cam
 
     def set_image(self, image: Image):
         self._image.set_image(image)
@@ -98,8 +83,8 @@ class ImgViewer(QtWidgets.QWidget):
     def hide_image(self):
         self._image.unset_image()
 
-    def set_info_message(self, text: str):
-        self._labelInfo.setText(text)
+    def set_info_message(self, message: str):
+        self._labelInfo.setText(message)
 
     def start_preview(self):
         logging.getLogger(__name__).debug("Start preview")
@@ -113,12 +98,15 @@ class ImgViewer(QtWidgets.QWidget):
         self._preview_worker.new_frame.connect(self._image.set_image)
 
         self._preview_thread.start()
+        self._is_running = True
 
     def stop_preview(self):
-        logging.getLogger(__name__).debug("Stop preview")
-        self._preview_worker.stop()
-        self._preview_worker.new_frame.disconnect()
-        self.hide_image()
+        if self._is_running:
+            logging.getLogger(__name__).debug("Stop preview")
+            self._preview_worker.stop()
+            self._preview_worker.new_frame.disconnect()
+            self.hide_image()
+            self._is_running = False
 
     def _show_preview_image(self):
         if self._preview_queue.empty():
@@ -126,3 +114,89 @@ class ImgViewer(QtWidgets.QWidget):
 
         image = self._preview_queue.get()
         self.set_image(image)
+
+    def is_running(self):
+        return self._is_running
+
+
+class FullscreenViewer(QtWidgets.QWidget):
+    fullscreen_off = QtCore.pyqtSignal()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._preview = PreviewWidget()
+        self._buttonFullscreen = QtWidgets.QPushButton("Exit fullscreen")
+        self._buttonStartPreview = QtWidgets.QPushButton("Start preview")
+        self._buttonStopPreview = QtWidgets.QPushButton("Stop preview")
+        self._buttonStopPreview.setEnabled(False)
+
+        self._buttonFullscreen.clicked.connect(self.exit_fullscreen)
+        self._buttonStartPreview.clicked.connect(self.start_preview)
+        self._buttonStopPreview.clicked.connect(self.stop_preview)
+
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self._preview)
+        layout.addWidget(self._buttonFullscreen)
+        layout.addWidget(self._buttonStartPreview)
+        layout.addWidget(self._buttonStopPreview)
+        self.setLayout(layout)
+
+    def exit_fullscreen(self):
+        self.stop_preview()
+        self.fullscreen_off.emit()
+
+    def set_camera(self, cam):
+        self._preview.set_camera(cam)
+
+    def start_preview(self):
+        self._preview.start_preview()
+        self._buttonStartPreview.setEnabled(False)
+        self._buttonStopPreview.setEnabled(True)
+        self._preview.set_info_message("Preview enabled")
+
+    def stop_preview(self):
+        self._preview.stop_preview()
+        self._buttonStartPreview.setEnabled(True)
+        self._buttonStopPreview.setEnabled(False)
+        self._preview.set_info_message("Preview disabled")
+
+
+
+class ImgViewer(QtWidgets.QWidget):
+    fullscreen_on = QtCore.pyqtSignal()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # QT elements
+        self._preview = PreviewWidget() 
+        self._buttonFullscreen = QtWidgets.QPushButton("Fullscreen")
+
+        self._buttonFullscreen.clicked.connect(self.open_fullscreen)
+
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self._preview)
+        layout.addWidget(self._buttonFullscreen)
+        self.setLayout(layout)
+
+    def open_fullscreen(self):
+        self.stop_preview()
+        self.fullscreen_on.emit()
+
+    def set_camera(self, cam):
+        self._preview.set_camera(cam)
+
+    def set_image(self, image: Image):
+        self._preview.set_image(image)
+
+    def hide_image(self):
+        self._preview.hide_image()
+
+    def set_info_message(self, text: str):
+        self._preview.set_info_message(text)
+
+    def start_preview(self):
+        self._preview.start_preview()
+
+    def stop_preview(self):
+        self._preview.stop_preview()
+

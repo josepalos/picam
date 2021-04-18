@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QStackedWidget
 from PyQt5.QtCore import Qt, QTimer, QObject, QThread, pyqtSignal
 
 import mainwindow
+import img_viewer
 try:
     from camera import Camera, Image
 except ModuleNotFoundError:
@@ -88,9 +89,6 @@ class Settings(QWidget, mainwindow.Ui_Form):
         self.btnShutter.clicked.connect(self.pressed_shutter)
         self.btnTogglePreview.clicked.connect(self.toggle_preview)
 
-        self.widgetImgViewer.fullscreen.connect(
-                lambda val: self._toggle_fullscreen(bool(val)))
-
         # Tabs:
         # (0) Image settings
         self.comboboxIso.currentTextChanged.connect(
@@ -139,9 +137,6 @@ class Settings(QWidget, mainwindow.Ui_Form):
     def _set_awb_mode(self, value: str):
         self.sliderAwbGain.setEnabled(value == "Off")
         self.cam.set_awb_mode(value)
-
-    def _toggle_fullscreen(self, value: bool):
-        logging.getLogger(__name__).debug("Set fullscreen to: %s", value)
 
     def _set_led(self, value):
         self.cam.set_led(bool(value))
@@ -206,16 +201,38 @@ class Controller(QMainWindow):
 
         # windows
         self.settings = Settings(self.cam, self.storage)
+
+        self.full_preview = img_viewer.FullscreenViewer()
+        self.full_preview.set_camera(self.cam)
+
+        self.settings.widgetImgViewer.fullscreen_on.connect(
+            lambda: self.toggle_fullscreen(True))
+        self.full_preview.fullscreen_off.connect(
+            lambda: self.toggle_fullscreen(False))
+
         self.pages = {
-            "settings": (self.settings, 0)
+            "settings": (self.settings, 0),
+            "preview": (self.full_preview, 1)
         }
 
         self.stack = QStackedWidget(self)
-        self.stack.addWidget(self.settings)
+        
+        for page, _ in self.pages.values():
+            self.stack.addWidget(page)
+
         self.setCentralWidget(self.stack)
 
-    def set_page(name: str):
+    def toggle_fullscreen(self, value: bool):
+        if value is True:
+            logging.getLogger(__name__).info("Open fullscreen preview")
+            self.set_page("preview")
+        else:
+            logging.getLogger(__name__).info("Exit fullscreen")
+            self.set_page("settings")
+
+    def set_page(self, name: str):
         _, idx = self.pages[name]
+        logging.getLogger(__name__).debug("Setting page with idx %d", idx)
         self.stack.setCurrentIndex(idx)
 
 

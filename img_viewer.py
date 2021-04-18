@@ -69,7 +69,7 @@ class PreviewWidget(QtWidgets.QWidget):
         self._image.set_image(Image.from_file("potato.jpg"))  # TODO: remove
         self._labelInfo = QtWidgets.QLabel()
 
-        layout = QtWidgets.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(self._image)
         layout.addWidget(self._labelInfo)
         self.setLayout(layout)
@@ -133,12 +133,13 @@ class FullscreenViewer(QtWidgets.QWidget):
         self._buttonStartPreview.clicked.connect(self.start_preview)
         self._buttonStopPreview.clicked.connect(self.stop_preview)
 
-        layout = QtWidgets.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(self._preview)
         layout.addWidget(self._buttonFullscreen)
         layout.addWidget(self._buttonStartPreview)
         layout.addWidget(self._buttonStopPreview)
         self.setLayout(layout)
+
 
     def exit_fullscreen(self):
         self.stop_preview()
@@ -173,7 +174,7 @@ class ImgViewer(QtWidgets.QWidget):
 
         self._buttonFullscreen.clicked.connect(self.open_fullscreen)
 
-        layout = QtWidgets.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(self._preview)
         layout.addWidget(self._buttonFullscreen)
         self.setLayout(layout)

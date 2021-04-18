@@ -231,9 +231,10 @@ class Controller(QMainWindow):
             self.set_page("settings")
 
     def set_page(self, name: str):
-        _, idx = self.pages[name]
+        widget, idx = self.pages[name]
         logging.getLogger(__name__).debug("Setting page with idx %d", idx)
         self.stack.setCurrentIndex(idx)
+        widget.setFixedSize(480, 320)
 
 
 def window(cam: Camera, storage: Storage):

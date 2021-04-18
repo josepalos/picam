@@ -5,7 +5,7 @@ import os.path
 import re
 import sys
 
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QStackedWidget
 from PyQt5.QtCore import Qt, QTimer, QObject, QThread, pyqtSignal
 
 import mainwindow
@@ -67,7 +67,7 @@ class ShutterWorker(QObject):
         self.finished.emit()
 
 
-class Window(QMainWindow, mainwindow.Ui_MainWindow):
+class Settings(QWidget, mainwindow.Ui_Form):
     def __init__(self, cam: Camera, storage: Storage):
         super().__init__()
         self._init_camera(cam)
@@ -197,9 +197,31 @@ class Window(QMainWindow, mainwindow.Ui_MainWindow):
         self._hide_image_timer.stop()
 
 
+class Controller(QMainWindow):
+    def __init__(self, cam, storage):
+        super().__init__()
+
+        self.cam = cam
+        self.storage = storage
+
+        # windows
+        self.settings = Settings(self.cam, self.storage)
+        self.pages = {
+            "settings": (self.settings, 0)
+        }
+
+        self.stack = QStackedWidget(self)
+        self.stack.addWidget(self.settings)
+        self.setCentralWidget(self.stack)
+
+    def set_page(name: str):
+        _, idx = self.pages[name]
+        self.stack.setCurrentIndex(idx)
+
+
 def window(cam: Camera, storage: Storage):
     app = QApplication(sys.argv)
-    window = Window(cam, storage)
+    window = Controller(cam, storage)
 
     window.showFullScreen()
 

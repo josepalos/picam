@@ -94,7 +94,7 @@ class Settings(QWidget, mainwindow.Ui_Form):
         self.comboboxIso.currentTextChanged.connect(
                 lambda val: self.cam.set_iso(int(val)))
         self.sliderAwbGain.valueChanged.connect(
-                lambda v: self.cam.set_awb_gain(float(v)))
+                lambda v: self.cam.set_awb_gain(float(v) / 10))
         self.comboboxAwbMode.currentTextChanged.connect(
                 self._set_awb_mode)
         self.sliderBrightness.valueChanged.connect(
@@ -108,25 +108,33 @@ class Settings(QWidget, mainwindow.Ui_Form):
         # (1) Timelapse
         self.spinboxTimelapseDelay.valueChanged.connect(
                 lambda val: print(val))
+        self.spinboxTimelapseDelay.setEnabled(False)
         self.spinboxTimelapseCount.valueChanged.connect(
                 lambda val: print(val))
+        self.spinboxTimelapseCount.setEnabled(False)
         # (2) Other
         self.checkboxLed.stateChanged.connect(self._set_led)
         self.checkboxDenoise.stateChanged.connect(
                 lambda val: print(val))
+        self.checkboxDenoise.setEnabled(False)
         self.buttonMaxFps.clicked.connect(self.cam.maximize_fps)
         self.comboboxImageFormat.currentTextChanged.connect(
                 lambda val: print(val))
+        self.comboboxImageFormat.setEnabled(False)
         self.sliderSharpness.valueChanged.connect(
                 lambda val: print(val))
+        self.sliderSharpness.setEnabled(False)
         self.sliderSaturation.valueChanged.connect(
                 lambda val: print(val))
+        self.sliderSaturation.setEnabled(False)
         self.comboboxMetermode.currentTextChanged.connect(
                 lambda val: print(val))
+        self.comboboxMetermode.setEnabled(False)
         self.sliderContrast.valueChanged.connect(
                 lambda val: self.cam.set_contrast(int(val)))
         self.comboboxDrc.currentTextChanged.connect(
                 lambda val: print(val))
+        self.comboboxDrc.setEnabled(False)
 
     def _init_camera(self, cam):
         self.cam = cam

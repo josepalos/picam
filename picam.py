@@ -100,7 +100,7 @@ class Settings(QWidget, mainwindow.Ui_Form):
         self.sliderBrightness.valueChanged.connect(
                 lambda val: self.cam.set_brightness(int(val)))
         self.comboboxExposure.currentTextChanged.connect(
-                self.cam.set_exposure)
+                lambda v: self.cam.set_exposure(v.lower()))
         self.comboboxShutterSpeed.currentTextChanged.connect(
                 lambda val: self.cam.set_shutter_speed(val))
         self.comboboxDelay.currentTextChanged.connect(
@@ -136,6 +136,7 @@ class Settings(QWidget, mainwindow.Ui_Form):
                 lambda val: print(val))
         self.comboboxDrc.setEnabled(False)
 
+
     def _init_camera(self, cam):
         self.cam = cam
         logging.getLogger(__name__).info("Camera exposure speed is: %s",
@@ -144,7 +145,7 @@ class Settings(QWidget, mainwindow.Ui_Form):
 
     def _set_awb_mode(self, value: str):
         self.sliderAwbGain.setEnabled(value == "Off")
-        self.cam.set_awb_mode(value)
+        self.cam.set_awb_mode(value.lower())
 
     def _set_led(self, value):
         self.cam.set_led(bool(value))

@@ -40,7 +40,6 @@ class Camera:
                                 framerate=framerate,
                                 sensor_mode=0)
         self._raw_capture = PiRGBArray(self._camera)
-        self.unfix_automatic_settings()
         self.shutter_speed = 0  # auto
 
         time.sleep(0.1)  # warm up

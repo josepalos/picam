@@ -66,7 +66,6 @@ class PreviewWidget(QtWidgets.QWidget):
         
         # Qt elements
         self._image = ImageWidget()
-        self._image.set_image(Image.from_file("potato.jpg"))  # TODO: remove
         self._labelInfo = QtWidgets.QLabel()
 
         layout = QtWidgets.QVBoxLayout(self)

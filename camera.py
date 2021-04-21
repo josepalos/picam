@@ -3,8 +3,13 @@ import logging
 import time
 
 import cv2
-from picamera import PiCamera
-from picamera.array import PiRGBArray
+try:
+    from picamera import PiCamera
+    from picamera.array import PiRGBArray
+except ModuleNotFoundError:
+    from virtualcamera import FakePicamera as PiCamera
+    from virtualcamera import FakePiRGBArray as PiRGBArray
+
 from PyQt5 import QtGui
 
 
@@ -23,6 +28,7 @@ class Image:
     def from_file(filename):
         cv2_img = cv2.imread(filename)
         return Image(cv2_img)
+
 
 class Camera:
     def __init__(self, resolution=None, framerate=None):
@@ -132,4 +138,3 @@ class Camera:
             # clear the stream for the next frame
             self._raw_capture.truncate(0)
             yield image
-            

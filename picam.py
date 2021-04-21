@@ -8,10 +8,7 @@ from PyQt5.QtCore import Qt, QTimer, QObject, QThread, pyqtSignal
 import mainwindow
 import img_viewer
 from storage import Storage, IMAGES_DIRECTORY
-try:
-    from camera import Camera, Image
-except ModuleNotFoundError:
-    from virtualcamera import Camera, Image
+from camera import Camera, Image
 
 
 class ShutterWorker(QObject):

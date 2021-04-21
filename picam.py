@@ -3,7 +3,7 @@ import logging
 import sys
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QStackedWidget
-from PyQt5.QtCore import Qt, QTimer, QObject, QThread, pyqtSignal
+from PyQt5.QtCore import Qt, QTimer, QObject, QThread, pyqtSignal, QFile, QIODevice
 
 import mainwindow
 import img_viewer
@@ -217,6 +217,16 @@ def window(cam: Camera, storage: Storage):
     return app.exec_()
 
 
+def load_stylesheet(app):
+    qss_file = QFile("stylesheet.qss")
+    if not qss_file.open(QIODevice.ReadOnly | QIODevice.Text):
+        logging.getLogger(__name__).warning("Could not load stylesheet")
+        return
+
+    app.setStyleSheet(bytes(qss_file.readAll()).decode())
+
+
+
 def main():
     logging.basicConfig(level=logging.DEBUG)
     storage = Storage(IMAGES_DIRECTORY)
@@ -224,8 +234,11 @@ def main():
 
     with Camera() as cam:
         app = QApplication(sys.argv)
+        load_stylesheet(app)
         controller = Controller(cam, storage)
-        controller.showFullScreen()
+        # controller.showFullScreen()
+        controller.show()
+        controller.resize(480, 320)
         sys.exit(app.exec_())
 
 

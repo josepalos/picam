@@ -44,12 +44,12 @@
     <rect>
      <x>250</x>
      <y>10</y>
-     <width>221</width>
+     <width>231</width>
      <height>301</height>
     </rect>
    </property>
-   <property name="styleSheet">
-    <string notr="true">QTabBar::scroller {width: 80px;}</string>
+   <property name="tabPosition">
+    <enum>QTabWidget::East</enum>
    </property>
    <property name="currentIndex">
     <number>0</number>
@@ -72,8 +72,8 @@
       <rect>
        <x>-1</x>
        <y>0</y>
-       <width>221</width>
-       <height>271</height>
+       <width>201</width>
+       <height>291</height>
       </rect>
      </property>
      <layout class="QFormLayout" name="formLayout">
@@ -444,8 +444,8 @@
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>211</width>
-       <height>271</height>
+       <width>201</width>
+       <height>291</height>
       </rect>
      </property>
      <layout class="QFormLayout" name="formLayout_2">
@@ -485,8 +485,8 @@
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>211</width>
-       <height>271</height>
+       <width>201</width>
+       <height>291</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">

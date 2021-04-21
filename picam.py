@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-import os
-import os.path
-import re
 import sys
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QStackedWidget
@@ -10,47 +7,11 @@ from PyQt5.QtCore import Qt, QTimer, QObject, QThread, pyqtSignal
 
 import mainwindow
 import img_viewer
+from storage import Storage, IMAGES_DIRECTORY
 try:
     from camera import Camera, Image
 except ModuleNotFoundError:
     from virtualcamera import Camera, Image
-
-
-IMAGES_DIRECTORY = "./images"
-
-
-class Storage:
-    def __init__(self, path, extension, num_digits: int = 4):
-        self.path = path
-        self.extension = extension
-        self._next_id = None
-        self._num_digits = num_digits
-
-    def start(self):
-        os.makedirs(self.path, exist_ok=True)
-        self._set_next_img_id()
-
-    def _set_next_img_id(self):
-        logger = logging.getLogger(__name__)
-        self._next_id = 0
-        files = [f for f in os.listdir(self.path)
-                 if os.path.isfile(os.path.join(self.path, f))]
-        img_regex = re.compile(f"IMG(\d+)\.{self.extension}")
-        for f in files:
-            if img_regex.match(f):
-                img_id = int(img_regex.match(f).group(1))
-                self._next_id = max(self._next_id, img_id + 1)
-
-        if self._next_id != 0:
-            logger.info("Storage has found existing images, starting at id"
-                        " %d", self._next_id)
-        else:
-            logger.info("Storage has not found any image. Starting at id 0")
-
-    def get_new_name(self):
-        img_name = f"IMG{self._next_id:0{self._num_digits}}.{self.extension}"
-        self._next_id += 1
-        return os.path.join(self.path, img_name)
 
 
 class ShutterWorker(QObject):
@@ -68,12 +29,13 @@ class ShutterWorker(QObject):
         self.finished.emit()
 
 
-class Settings(QWidget, mainwindow.Ui_Form):
+class SettingsWidget(QWidget, mainwindow.Ui_Form):
     def __init__(self, cam: Camera, storage: Storage):
         super().__init__()
         self._init_camera(cam)
         self.storage = storage
         self.previewing = False
+        self._extension_selected = None
 
         # Setup UI
         self.setupUi(self)
@@ -119,8 +81,9 @@ class Settings(QWidget, mainwindow.Ui_Form):
         self.checkboxDenoise.setEnabled(False)
         self.buttonMaxFps.clicked.connect(self.cam.maximize_fps)
         self.comboboxImageFormat.currentTextChanged.connect(
-                lambda val: print(val))
-        self.comboboxImageFormat.setEnabled(False)
+                self._set_extension)
+        self._set_extension(self.comboboxImageFormat.currentText())
+
         self.sliderSharpness.valueChanged.connect(
                 lambda val: print(val))
         self.sliderSharpness.setEnabled(False)
@@ -136,12 +99,14 @@ class Settings(QWidget, mainwindow.Ui_Form):
                 lambda val: print(val))
         self.comboboxDrc.setEnabled(False)
 
-
     def _init_camera(self, cam):
         self.cam = cam
         logging.getLogger(__name__).info("Camera exposure speed is: %s",
                                          self.cam.get_exposure_speed())
         self.cam.set_led(False)
+
+    def _set_extension(self, value: str):
+        self._extension_selected = value.lower()
 
     def _set_awb_mode(self, value: str):
         self.sliderAwbGain.setEnabled(value == "Off")
@@ -157,7 +122,7 @@ class Settings(QWidget, mainwindow.Ui_Form):
     def pressed_shutter(self):
         if self.previewing:
             self.toggle_preview()
-        filename = self.storage.get_new_name()
+        filename = self.storage.get_new_name(self._extension_selected)
 
         # create the qthread and the worker
         self._shutter_thread = QThread()
@@ -209,7 +174,7 @@ class Controller(QMainWindow):
         self.storage = storage
 
         # windows
-        self.settings = Settings(self.cam, self.storage)
+        self.settings = SettingsWidget(self.cam, self.storage)
 
         self.full_preview = img_viewer.FullscreenViewer()
         self.full_preview.set_camera(self.cam)
@@ -257,12 +222,14 @@ def window(cam: Camera, storage: Storage):
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
-    storage = Storage(IMAGES_DIRECTORY, "png")
+    storage = Storage(IMAGES_DIRECTORY)
     storage.start()
 
     with Camera() as cam:
-        exit_code = window(cam, storage)
-    sys.exit(exit_code)
+        app = QApplication(sys.argv)
+        controller = Controller(cam, storage)
+        controller.showFullScreen()
+        sys.exit(app.exec_())
 
 
 if __name__ == "__main__":

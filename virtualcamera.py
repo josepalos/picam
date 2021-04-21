@@ -16,6 +16,7 @@ class Image:
         bytes_per_line = ch * w
         return QtGui.QImage(rgb_image.data, w, h, bytes_per_line,
                             QtGui.QImage.Format_RGB888)
+
     @staticmethod
     def from_file(filename):
         cv2_img = cv2.imread("potato.jpg")
@@ -34,6 +35,7 @@ class Camera:
         pass
 
     def close(self):
+        logging.getLogger(__name__).debug("Close camera")
         pass
 
     def __enter__(self):

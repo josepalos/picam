@@ -86,49 +86,49 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
         # Tabs:
         # (0) Image settings
         self.comboboxIso.currentTextChanged.connect(
-                lambda val: self.cam.set_iso(int(val)))
+            lambda val: self.cam.set_iso(int(val)))
         self.sliderAwbGain.valueChanged.connect(
-                lambda v: self.cam.set_awb_gain(float(v) / 10))
+            lambda v: self.cam.set_awb_gain(float(v) / 10))
         self.comboboxAwbMode.currentTextChanged.connect(
-                self._set_awb_mode)
+            self._set_awb_mode)
         self.sliderBrightness.valueChanged.connect(
-                lambda val: self.cam.set_brightness(int(val)))
+            lambda val: self.cam.set_brightness(int(val)))
         self.comboboxExposure.currentTextChanged.connect(
-                lambda v: self.cam.set_exposure(v.lower()))
+            lambda v: self.cam.set_exposure(v.lower()))
         self.comboboxShutterSpeed.currentTextChanged.connect(
-                lambda val: self.cam.set_shutter_speed(val))
+            lambda val: self.cam.set_shutter_speed(val))
         self.comboboxDelay.currentTextChanged.connect(
-                lambda val: self.cam.set_delay(int(val)))
+            lambda val: self.cam.set_delay(int(val)))
         # (1) Timelapse
         self.spinboxTimelapseDelay.valueChanged.connect(
-                lambda val: print(val))
+            lambda val: print(val))
         self.spinboxTimelapseDelay.setEnabled(False)
         self.spinboxTimelapseCount.valueChanged.connect(
-                lambda val: print(val))
+            lambda val: print(val))
         self.spinboxTimelapseCount.setEnabled(False)
         # (2) Other
         self.checkboxLed.stateChanged.connect(self._set_led)
         self.checkboxDenoise.stateChanged.connect(
-                lambda val: print(val))
+            lambda val: print(val))
         self.checkboxDenoise.setEnabled(False)
         self.buttonMaxFps.clicked.connect(self.cam.maximize_fps)
         self.comboboxImageFormat.currentTextChanged.connect(
-                self._set_extension)
+            self._set_extension)
         self._set_extension(self.comboboxImageFormat.currentText())
 
         self.sliderSharpness.valueChanged.connect(
-                lambda val: print(val))
+            lambda val: print(val))
         self.sliderSharpness.setEnabled(False)
         self.sliderSaturation.valueChanged.connect(
-                lambda val: print(val))
+            lambda val: print(val))
         self.sliderSaturation.setEnabled(False)
         self.comboboxMetermode.currentTextChanged.connect(
-                lambda val: print(val))
+            lambda val: print(val))
         self.comboboxMetermode.setEnabled(False)
         self.sliderContrast.valueChanged.connect(
-                lambda val: self.cam.set_contrast(int(val)))
+            lambda val: self.cam.set_contrast(int(val)))
         self.comboboxDrc.currentTextChanged.connect(
-                lambda val: print(val))
+            lambda val: print(val))
         self.comboboxDrc.setEnabled(False)
         # enable scroll on the last tab
         QScroller.grabGesture(
@@ -177,15 +177,21 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
         self._shutter_worker.finished.connect(self._shutter_worker.deleteLater)
         self._shutter_thread.finished.connect(self._shutter_thread.deleteLater)
         self._shutter_worker.captured.connect(
-                lambda img: self._display_image(img, 5))
+            lambda img: self._display_image(img, 5))
 
         # run the thread
         self._shutter_thread.start()
-        
+
         # disable the button until the thread finishes
         self.btnShutter.setEnabled(False)
-        self._shutter_thread.finished.connect(
-                lambda: self.btnShutter.setEnabled(True))
+        self.btnTogglePreview.setEnabled(False)
+        self.widgetImgViewer.buttonFullscreen.setEnabled(False)
+        self._shutter_thread.finished.connect(self._finished_shutter_speed)
+
+    def _finished_shutter_thread(self):
+        self.btnShutter.setEnabled(True)
+        self.btnTogglePreview.setEnabled(True)
+        self.widgetImgViewer.buttonFullscreen.setEnabled(True)
 
     def toggle_preview(self):
         if self.previewing:
@@ -200,7 +206,7 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
 
         if timeout is not None:
             self._hide_image_timer.start(timeout * 1000)
-    
+
     def _hide_image(self):
         self.widgetImgViewer.hide_image()
         self.widgetImgViewer.set_info_message("Preview disabled")
@@ -231,7 +237,7 @@ class Controller(QMainWindow):
         }
 
         self.stack = QStackedWidget(self)
-        
+
         for page, _ in self.pages.values():
             self.stack.addWidget(page)
 

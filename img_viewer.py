@@ -63,7 +63,7 @@ class PreviewWidget(QtWidgets.QWidget):
         self._preview_thread = None
         self._preview_worker = None
         self._is_running = False
-        
+
         # Qt elements
         self._image = ImageWidget()
         self._labelInfo = QtWidgets.QLabel()
@@ -120,6 +120,7 @@ class PreviewWidget(QtWidgets.QWidget):
 
 class FullscreenViewer(QtWidgets.QWidget):
     fullscreen_off = QtCore.pyqtSignal()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._preview = PreviewWidget()
@@ -132,13 +133,12 @@ class FullscreenViewer(QtWidgets.QWidget):
         self._buttonStartPreview.clicked.connect(self.start_preview)
         self._buttonStopPreview.clicked.connect(self.stop_preview)
 
-        layout = QtWidgets.QVBoxLayout(self)
-        layout.addWidget(self._preview)
-        layout.addWidget(self._buttonFullscreen)
-        layout.addWidget(self._buttonStartPreview)
-        layout.addWidget(self._buttonStopPreview)
+        layout = QtWidgets.QGridLayout(self)
+        layout.addWidget(self._preview, 0, 0, -1, 1)
+        layout.addWidget(self._buttonFullscreen, 0, 1)
+        layout.addWidget(self._buttonStartPreview, 1, 1)
+        layout.addWidget(self._buttonStopPreview, 2, 1)
         self.setLayout(layout)
-
 
     def exit_fullscreen(self):
         self.stop_preview()
@@ -160,7 +160,6 @@ class FullscreenViewer(QtWidgets.QWidget):
         self._preview.set_info_message("Preview disabled")
 
 
-
 class ImgViewer(QtWidgets.QWidget):
     fullscreen_on = QtCore.pyqtSignal()
 
@@ -168,14 +167,14 @@ class ImgViewer(QtWidgets.QWidget):
         super().__init__(*args, **kwargs)
 
         # QT elements
-        self._preview = PreviewWidget() 
-        self._buttonFullscreen = QtWidgets.QPushButton("Fullscreen")
+        self._preview = PreviewWidget()
+        self.buttonFullscreen = QtWidgets.QPushButton("Fullscreen")
 
-        self._buttonFullscreen.clicked.connect(self.open_fullscreen)
+        self.buttonFullscreen.clicked.connect(self.open_fullscreen)
 
         layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(self._preview)
-        layout.addWidget(self._buttonFullscreen)
+        layout.addWidget(self.buttonFullscreen)
         self.setLayout(layout)
 
     def open_fullscreen(self):
@@ -199,4 +198,3 @@ class ImgViewer(QtWidgets.QWidget):
 
     def stop_preview(self):
         self._preview.stop_preview()
-

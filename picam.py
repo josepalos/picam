@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
+import socket
+from subprocess import Popen, PIPE
 import sys
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QStackedWidget, QScroller
@@ -8,7 +10,35 @@ from PyQt5.QtCore import Qt, QTimer, QObject, QThread, pyqtSignal, QFile, QIODev
 import mainwindow
 import img_viewer
 from storage import Storage, IMAGES_DIRECTORY
-from camera import Camera, Image
+from camera import Camera, Image, REAL_CAMERA
+
+
+def get_commit():
+    # Stackoverflow 65076306
+    process = Popen(["git", "rev-parse", "--short", "HEAD"], stdout=PIPE)
+    (commit_hash, err) = process.communicate()
+    exit_code = process.wait()
+    if exit_code != 0:
+        logging.getLogger(__name__).warning("Could not detect commit hash")
+        return None
+    else:
+        return commit_hash.decode().strip()
+
+
+def get_ip():
+    # Stackoverflow 166506 (answer from fatal_error)
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("1.1.1.1", 1))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = '127.0.0.1'
+    finally:
+        s.close()
+    return ip
+
+
+COMMIT = get_commit()
 
 
 class ShutterWorker(QObject):
@@ -99,6 +129,15 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
         QScroller.grabGesture(
             self.scrollAreaOtherSettings.viewport(), QScroller.LeftMouseButtonGesture
         )
+        # (3) Info
+        self.update_info()  # TODO call this periodically?
+
+    def update_info(self):
+        ip = get_ip()
+
+        self.labelIp.setText(f"System IP: {ip}")
+        self.labelCommit.setText(f"Project version (commit):\n{COMMIT}")
+        self.labelRealCamera.setText(f"Using real camera: {REAL_CAMERA}")
 
     def _init_camera(self, cam):
         self.cam = cam
@@ -115,10 +154,6 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
 
     def _set_led(self, value):
         self.cam.set_led(bool(value))
-
-    def _set_denosie(self, value):
-        value = bool(value)
-        logging.getLogger(__name__).debug(f"Denoise: {value}")
 
     def pressed_shutter(self):
         if self.previewing:
@@ -228,7 +263,6 @@ def load_stylesheet(app):
         return
 
     app.setStyleSheet(bytes(qss_file.readAll()).decode())
-
 
 
 def main():

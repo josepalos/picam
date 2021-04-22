@@ -6,15 +6,17 @@ from subprocess import Popen, PIPE
 import sys
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QStackedWidget, QScroller
-from PyQt5.QtCore import Qt, QTimer, QObject, QThread, pyqtSignal, QFile, QIODevice
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QFile, QIODevice
 
 import mainwindow
 import img_viewer
 from storage import Storage
-from camera import Camera, Image, REAL_CAMERA
+from camera import Camera, REAL_CAMERA
+
 
 BASE_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
 IMAGES_DIRECTORY = os.path.join(BASE_DIRECTORY, "images")
+
 
 def get_commit():
     # Stackoverflow 65076306
@@ -46,28 +48,14 @@ def get_ip():
 COMMIT = get_commit()
 
 
-class ShutterWorker(QObject):
-    finished = pyqtSignal()
-    captured = pyqtSignal(Image)
-
-    def __init__(self, camera, filename):
-        super().__init__()
-        self.camera = camera
-        self.filename = filename
-
-    def run(self):
-        self.camera.take_picture(self.filename)
-        self.captured.emit(Image.from_file(self.filename))
-        self.finished.emit()
-
-
 class SettingsWidget(QWidget, mainwindow.Ui_Form):
-    def __init__(self, cam: Camera, storage: Storage):
+    def __init__(self, cam: Camera, shutter: img_viewer.Shutter):
         super().__init__()
         self._init_camera(cam)
-        self.storage = storage
+        self._shutter = shutter
+        self._shutter.captured.connect(lambda img: self._display_image(img, 5))
+
         self.previewing = False
-        self._extension_selected = None
 
         # Setup UI
         self.setupUi(self)
@@ -76,9 +64,6 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
 
         self._hide_image_timer = QTimer(self)
         self._hide_image_timer.timeout.connect(self._hide_image)
-
-        self._shutter_thread = None
-        self._shutter_worker = None
 
         self.btnShutter.clicked.connect(self.pressed_shutter)
         self.btnTogglePreview.clicked.connect(self.toggle_preview)
@@ -98,7 +83,7 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
         self.comboboxShutterSpeed.currentTextChanged.connect(
             lambda val: self.cam.set_shutter_speed(val))
         self.comboboxDelay.currentTextChanged.connect(
-            lambda val: self.cam.set_delay(int(val)))
+            lambda val: self._shutter.set_delay(int(val)))
         # (1) Timelapse
         self.spinboxTimelapseDelay.valueChanged.connect(
             lambda val: print(val))
@@ -151,7 +136,7 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
         self.cam.set_led(False)
 
     def _set_extension(self, value: str):
-        self._extension_selected = value.lower()
+        self._shutter.capture_format = value.lower()
 
     def _set_awb_mode(self, value: str):
         self.sliderAwbGain.setEnabled(value == "Off")
@@ -163,30 +148,12 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
     def pressed_shutter(self):
         if self.previewing:
             self.toggle_preview()
-        filename = self.storage.get_new_name(self._extension_selected)
 
-        # create the qthread and the worker
-        self._shutter_thread = QThread()
-        self._shutter_worker = ShutterWorker(self.cam, filename)
-        # move the worker to the thread
-        self._shutter_worker.moveToThread(self._shutter_thread)
-
-        # connect signals and slots
-        self._shutter_thread.started.connect(self._shutter_worker.run)
-        self._shutter_worker.finished.connect(self._shutter_thread.quit)
-        self._shutter_worker.finished.connect(self._shutter_worker.deleteLater)
-        self._shutter_thread.finished.connect(self._shutter_thread.deleteLater)
-        self._shutter_worker.captured.connect(
-            lambda img: self._display_image(img, 5))
-
-        # run the thread
-        self._shutter_thread.start()
-
-        # disable the button until the thread finishes
         self.btnShutter.setEnabled(False)
         self.btnTogglePreview.setEnabled(False)
         self.widgetImgViewer.buttonFullscreen.setEnabled(False)
-        self._shutter_thread.finished.connect(self._finished_shutter_speed)
+        self._shutter.take_picture()
+        self._shutter.finished.connect(self._finished_shutter_thread)
 
     def _finished_shutter_thread(self):
         self.btnShutter.setEnabled(True)
@@ -214,17 +181,14 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
 
 
 class Controller(QMainWindow):
-    def __init__(self, cam, storage):
+    def __init__(self, cam, shutter):
         super().__init__()
 
-        self.cam = cam
-        self.storage = storage
-
         # windows
-        self.settings = SettingsWidget(self.cam, self.storage)
+        self.settings = SettingsWidget(cam, shutter)
 
         self.full_preview = img_viewer.FullscreenViewer()
-        self.full_preview.set_camera(self.cam)
+        self.full_preview.set_camera(cam)
 
         self.settings.widgetImgViewer.fullscreen_on.connect(
             lambda: self.toggle_fullscreen(True))
@@ -282,9 +246,11 @@ def main():
     storage.start()
 
     with Camera() as cam:
+        shutter = img_viewer.Shutter(cam, storage)
+
         app = QApplication(sys.argv)
         load_stylesheet(app)
-        controller = Controller(cam, storage)
+        controller = Controller(cam, shutter)
         # controller.showFullScreen()
         controller.show()
         controller.resize(480, 320)

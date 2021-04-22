@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import time
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QTimer, QObject, QThread, pyqtSignal
@@ -11,7 +12,7 @@ except ModuleNotFoundError:
     from virtualcamera import Image
 
 
-class ImageWidget(QtWidgets.QLabel):
+class _ImageWidget(QtWidgets.QLabel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setScaledContents(True)
@@ -30,7 +31,7 @@ class ImageWidget(QtWidgets.QLabel):
         self.clear()
 
 
-class PreviewWorker(QObject):
+class _PreviewWorker(QObject):
     finished = pyqtSignal()
     new_frame = pyqtSignal(Image)
 
@@ -55,7 +56,77 @@ class PreviewWorker(QObject):
         self._is_running = False
 
 
-class PreviewWidget(QtWidgets.QWidget):
+class _ShutterWorker(QObject):
+    start_capture = pyqtSignal()
+    finished = pyqtSignal()
+    captured = pyqtSignal(Image)
+
+    def __init__(self, camera, filename, delay):
+        super().__init__()
+        self.camera = camera
+        self.filename = filename
+        self.delay = delay
+
+    def run(self):
+        time.sleep(self.delay)
+        self.start_capture.emit()
+
+        start = time.time()
+        self.camera.take_picture(self.filename)
+        end = time.time()
+        logging.getLogger(__name__).info("Image saved at %s", self.filename)
+        logging.getLogger(__name__).debug("Image took %d seconds", end - start)
+
+        self.captured.emit(Image.from_file(self.filename))
+        self.finished.emit()
+
+
+class Shutter(QObject):
+    start = pyqtSignal()
+    start_capture = pyqtSignal()
+    captured = pyqtSignal(Image)
+    finished = pyqtSignal()
+
+    def __init__(self, camera, storage):
+        super().__init__()
+
+        self.camera = camera
+        self.storage = storage
+        self._worker = None
+        self._thread = None
+        self.capture_format = None
+        self._delay = 0
+
+    def take_picture(self):
+        self.start.emit()
+        filename = self.storage.get_new_name(self.capture_format)
+
+        self._thread = QThread()
+        self._worker = _ShutterWorker(self.camera, filename, self._delay)
+        # move the worker to the thread
+        self._worker.moveToThread(self._thread)
+
+        # connect signals and slots
+        self._thread.started.connect(self._worker.run)
+
+        self._worker.finished.connect(self._thread.quit)
+        self._worker.finished.connect(self._worker.deleteLater)
+        self._thread.finished.connect(self._thread.deleteLater)
+
+        # extend worker signals
+        self._worker.finished.connect(self.finished.emit)
+        self._worker.captured.connect(self.captured.emit)
+        self._worker.start_capture.connect(self.start_capture)
+
+        # Run the thread
+        self._thread.start()
+
+    def set_delay(self, value: int):
+        logging.getLogger(__name__).debug("Set delay value to %d", value)
+        self._delay = value
+
+
+class _PreviewWidget(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.camera = None
@@ -65,7 +136,7 @@ class PreviewWidget(QtWidgets.QWidget):
         self._is_running = False
 
         # Qt elements
-        self._image = ImageWidget()
+        self._image = _ImageWidget()
         self._labelInfo = QtWidgets.QLabel()
 
         layout = QtWidgets.QVBoxLayout(self)
@@ -88,7 +159,7 @@ class PreviewWidget(QtWidgets.QWidget):
     def start_preview(self):
         logging.getLogger(__name__).debug("Start preview")
         self._preview_thread = QThread()
-        self._preview_worker = PreviewWorker(self.camera)
+        self._preview_worker = _PreviewWorker(self.camera)
         self._preview_worker.moveToThread(self._preview_thread)
         self._preview_thread.started.connect(self._preview_worker.run)
         self._preview_thread.finished.connect(self._preview_thread.deleteLater)
@@ -123,7 +194,7 @@ class FullscreenViewer(QtWidgets.QWidget):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._preview = PreviewWidget()
+        self._preview = _PreviewWidget()
         self._buttonFullscreen = QtWidgets.QPushButton("Exit fullscreen")
         self._buttonStartPreview = QtWidgets.QPushButton("Start preview")
         self._buttonStopPreview = QtWidgets.QPushButton("Stop preview")
@@ -167,7 +238,7 @@ class ImgViewer(QtWidgets.QWidget):
         super().__init__(*args, **kwargs)
 
         # QT elements
-        self._preview = PreviewWidget()
+        self._preview = _PreviewWidget()
         self.buttonFullscreen = QtWidgets.QPushButton("Fullscreen")
 
         self.buttonFullscreen.clicked.connect(self.open_fullscreen)

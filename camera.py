@@ -38,7 +38,6 @@ class Camera:
         self._raw_capture = None
         self._resolution = resolution
         self._framerate = framerate
-        self._delay = 0
 
     def open(self):
         framerate = self._framerate
@@ -112,10 +111,6 @@ class Camera:
                                           value, microseconds)
         self._camera.shutter_speed = microseconds
 
-    def set_delay(self, value: int):
-        logging.getLogger(__name__).debug("Set delay value to %d", value)
-        self._delay = value
-
     def set_led(self, value: bool):
         logging.getLogger(__name__).debug("Set led value to %s", value)
         self._camera.led = value
@@ -125,13 +120,8 @@ class Camera:
 
     def take_picture(self, filename: str):
         logging.getLogger(__name__).debug("Take new picture")
-        time.sleep(self._delay)
-        start = time.time()
         self._camera.capture(filename)
-        end = time.time()
-        logging.getLogger(__name__).info("Image saved at %s", filename)
-        logging.getLogger(__name__).debug("Image took %d seconds", end - start)
-    
+
     def preview(self):
         for frame in self._camera.capture_continuous(self._raw_capture,
                                                      format="bgr",

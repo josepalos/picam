@@ -5,17 +5,21 @@ import socket
 from subprocess import Popen, PIPE
 import sys
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QStackedWidget, QScroller
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget,
+                             QStackedWidget, QScroller, QGridLayout,
+                             QPushButton)
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QFile, QIODevice
 
 import mainwindow
 import img_viewer
+from img_viewer import Shutter, PreviewWidget
 from storage import Storage
 from camera import Camera, REAL_CAMERA
 
 
 BASE_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
 IMAGES_DIRECTORY = os.path.join(BASE_DIRECTORY, "images")
+CAPTURE_PREVIEW_TIMEOUT = 5
 
 
 def get_commit():
@@ -53,7 +57,7 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
         super().__init__()
         self._init_camera(cam)
         self._shutter = shutter
-        self._shutter.captured.connect(lambda img: self._display_image(img, 5))
+        self._shutter.captured.connect(lambda img: self._display_image(img, CAPTURE_PREVIEW_TIMEOUT))
 
         self.previewing = False
 
@@ -180,6 +184,87 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
         self._hide_image_timer.stop()
 
 
+class FullscreenViewer(QWidget):
+    fullscreen_off = pyqtSignal()
+
+    def __init__(self, shutter: Shutter, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._preview = PreviewWidget()
+        self._previewing = False
+        self._shutter = shutter
+        self._shutter.captured.connect(lambda img: self._display_image(img, CAPTURE_PREVIEW_TIMEOUT))
+
+        self._hide_image_timer = QTimer(self)
+        self._hide_image_timer.timeout.connect(self._hide_image)
+
+        self._buttonFullscreen = QPushButton("Exit fullscreen")
+        self._buttonStartPreview = QPushButton("Start preview")
+        self._buttonStopPreview = QPushButton("Stop preview")
+        self._buttonStopPreview.setEnabled(False)
+        self._buttonShutter = QPushButton("Take picture")
+
+        self._buttonFullscreen.clicked.connect(self.exit_fullscreen)
+        self._buttonStartPreview.clicked.connect(self.start_preview)
+        self._buttonStopPreview.clicked.connect(self.stop_preview)
+        self._buttonShutter.clicked.connect(self._shutter_pressed)
+
+        layout = QGridLayout(self)
+        layout.addWidget(self._preview, 0, 0, -1, 1)
+        layout.addWidget(self._buttonFullscreen, 0, 1)
+        layout.addWidget(self._buttonStartPreview, 1, 1)
+        layout.addWidget(self._buttonStopPreview, 2, 1)
+        layout.addWidget(self._buttonShutter, 3, 1)
+        self.setLayout(layout)
+
+    def _shutter_pressed(self):
+        if self._previewing:
+            self.stop_preview()
+
+        self._buttonFullscreen.setEnabled(False)
+        self._buttonStartPreview.setEnabled(False)
+        self._buttonShutter.setEnabled(False)
+
+        self._shutter.finished.connect(self._shutter_finished)
+        self._shutter.take_picture()
+
+    def _shutter_finished(self):
+        self._buttonFullscreen.setEnabled(True)
+        self._buttonStartPreview.setEnabled(True)
+        self._buttonShutter.setEnabled(True)
+
+    def exit_fullscreen(self):
+        self.stop_preview()
+        self.fullscreen_off.emit()
+
+    def set_camera(self, cam):
+        self._preview.set_camera(cam)
+
+    def start_preview(self):
+        self._preview.start_preview()
+        self._buttonStartPreview.setEnabled(False)
+        self._buttonStopPreview.setEnabled(True)
+        self._preview.set_info_message("Preview enabled")
+        self._previewing = True
+
+    def stop_preview(self):
+        self._preview.stop_preview()
+        self._buttonStartPreview.setEnabled(True)
+        self._buttonStopPreview.setEnabled(False)
+        self._preview.set_info_message("Preview disabled")
+        self._previewing = False
+
+    def _display_image(self, image, timeout=None):
+        self._preview.set_image(image)
+
+        if timeout is not None:
+            self._hide_image_timer.start(timeout * 1000)
+
+    def _hide_image(self):
+        self._preview.hide_image()
+        self._preview.set_info_message("Preview disabled")
+        self._hide_image_timer.stop()
+
+
 class Controller(QMainWindow):
     def __init__(self, cam, shutter):
         super().__init__()
@@ -187,7 +272,7 @@ class Controller(QMainWindow):
         # windows
         self.settings = SettingsWidget(cam, shutter)
 
-        self.full_preview = img_viewer.FullscreenViewer(shutter)
+        self.full_preview = FullscreenViewer(shutter)
         self.full_preview.set_camera(cam)
 
         self.settings.widgetImgViewer.fullscreen_on.connect(

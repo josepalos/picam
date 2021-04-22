@@ -4,7 +4,7 @@ import logging
 import time
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QTimer, QObject, QThread, pyqtSignal
+from PyQt5.QtCore import QObject, QThread, pyqtSignal
 
 try:
     from camera import Image
@@ -126,7 +126,7 @@ class Shutter(QObject):
         self._delay = value
 
 
-class _PreviewWidget(QtWidgets.QWidget):
+class PreviewWidget(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.camera = None
@@ -189,72 +189,6 @@ class _PreviewWidget(QtWidgets.QWidget):
         return self._is_running
 
 
-class FullscreenViewer(QtWidgets.QWidget):
-    fullscreen_off = QtCore.pyqtSignal()
-
-    def __init__(self, shutter: Shutter, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._shutter = shutter
-        self._preview = _PreviewWidget()
-        self._previewing = False
-
-        self._buttonFullscreen = QtWidgets.QPushButton("Exit fullscreen")
-        self._buttonStartPreview = QtWidgets.QPushButton("Start preview")
-        self._buttonStopPreview = QtWidgets.QPushButton("Stop preview")
-        self._buttonStopPreview.setEnabled(False)
-        self._buttonShutter = QtWidgets.QPushButton("Take picture")
-
-        self._buttonFullscreen.clicked.connect(self.exit_fullscreen)
-        self._buttonStartPreview.clicked.connect(self.start_preview)
-        self._buttonStopPreview.clicked.connect(self.stop_preview)
-        self._buttonShutter.clicked.connect(self._shutter_pressed)
-
-        layout = QtWidgets.QGridLayout(self)
-        layout.addWidget(self._preview, 0, 0, -1, 1)
-        layout.addWidget(self._buttonFullscreen, 0, 1)
-        layout.addWidget(self._buttonStartPreview, 1, 1)
-        layout.addWidget(self._buttonStopPreview, 2, 1)
-        layout.addWidget(self._buttonShutter, 3, 1)
-        self.setLayout(layout)
-
-    def _shutter_pressed(self):
-        if self._previewing:
-            self.stop_preview()
-
-        self._buttonFullscreen.setEnabled(False)
-        self._buttonStartPreview.setEnabled(False)
-        self._buttonShutter.setEnabled(False)
-
-        self._shutter.finished.connect(self._shutter_finished)
-        self._shutter.take_picture()
-
-    def _shutter_finished(self):
-        self._buttonFullscreen.setEnabled(True)
-        self._buttonStartPreview.setEnabled(True)
-        self._buttonShutter.setEnabled(True)
-
-    def exit_fullscreen(self):
-        self.stop_preview()
-        self.fullscreen_off.emit()
-
-    def set_camera(self, cam):
-        self._preview.set_camera(cam)
-
-    def start_preview(self):
-        self._preview.start_preview()
-        self._buttonStartPreview.setEnabled(False)
-        self._buttonStopPreview.setEnabled(True)
-        self._preview.set_info_message("Preview enabled")
-        self._previewing = True
-
-    def stop_preview(self):
-        self._preview.stop_preview()
-        self._buttonStartPreview.setEnabled(True)
-        self._buttonStopPreview.setEnabled(False)
-        self._preview.set_info_message("Preview disabled")
-        self._previewing = False
-
-
 class ImgViewer(QtWidgets.QWidget):
     fullscreen_on = QtCore.pyqtSignal()
 
@@ -262,7 +196,7 @@ class ImgViewer(QtWidgets.QWidget):
         super().__init__(*args, **kwargs)
 
         # QT elements
-        self._preview = _PreviewWidget()
+        self._preview = PreviewWidget()
         self.buttonFullscreen = QtWidgets.QPushButton("Fullscreen")
 
         self.buttonFullscreen.clicked.connect(self.open_fullscreen)

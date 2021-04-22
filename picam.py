@@ -152,8 +152,8 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
         self.btnShutter.setEnabled(False)
         self.btnTogglePreview.setEnabled(False)
         self.widgetImgViewer.buttonFullscreen.setEnabled(False)
-        self._shutter.take_picture()
         self._shutter.finished.connect(self._finished_shutter_thread)
+        self._shutter.take_picture()
 
     def _finished_shutter_thread(self):
         self.btnShutter.setEnabled(True)
@@ -187,7 +187,7 @@ class Controller(QMainWindow):
         # windows
         self.settings = SettingsWidget(cam, shutter)
 
-        self.full_preview = img_viewer.FullscreenViewer()
+        self.full_preview = img_viewer.FullscreenViewer(shutter)
         self.full_preview.set_camera(cam)
 
         self.settings.widgetImgViewer.fullscreen_on.connect(

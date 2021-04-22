@@ -1,9 +1,9 @@
 QPushButton {
-    background: yellow;
+    min-height: 40px;
 }
 
 QComboBox {
-    min-height: 2em;
+    height: 30px;
 }
 
 QSlider {
@@ -32,6 +32,15 @@ QSlider::add-page:horizontal {
     border-radius: 4px;
 }
 
+QSlider::sub-page:horizontal:disabled {
+    background: #bbb;
+    border-color:#999;
+}
+QSlider::add-page:horizontal:disabled {
+    background: #eee;
+    border-color: #999;
+}
+
 QSlider::handle:horizontal {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #b4b4b4, stop:1 #8f8f8f);
     border: 1px solid #5c5c5c;
@@ -39,4 +48,29 @@ QSlider::handle:horizontal {
     margin-top: -2px;
     margin-bottom: -2px;
     border-radius: 8px;
+}
+
+QSlider::handle:horizontal:disabled {
+    background: #eee;
+    border: 1px solid #aaa;
+}
+
+QCheckBox::indicator {
+    width: 30px;
+    height: 30px;
+}
+
+QSpinBox {
+    padding-right: 20px;  /* make room for the arrows */
+    height: 30px;
+}
+
+QSpinBox::up-button {
+    width: 30px;
+    height: 15zpx;
+}
+
+QSpinBox::down-button {
+    width: 30px;
+    height: 15px;
 }

@@ -2,7 +2,7 @@
 import logging
 import sys
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QStackedWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QStackedWidget, QScroller
 from PyQt5.QtCore import Qt, QTimer, QObject, QThread, pyqtSignal, QFile, QIODevice
 
 import mainwindow
@@ -95,6 +95,10 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
         self.comboboxDrc.currentTextChanged.connect(
                 lambda val: print(val))
         self.comboboxDrc.setEnabled(False)
+        # enable scroll on the last tab
+        QScroller.grabGesture(
+            self.scrollAreaOtherSettings.viewport(), QScroller.LeftMouseButtonGesture
+        )
 
     def _init_camera(self, cam):
         self.cam = cam

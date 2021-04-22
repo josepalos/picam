@@ -16,10 +16,10 @@
   <widget class="QPushButton" name="btnShutter">
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>260</y>
-     <width>111</width>
-     <height>51</height>
+     <x>10</x>
+     <y>240</y>
+     <width>100</width>
+     <height>50</height>
     </rect>
    </property>
    <property name="text">
@@ -29,10 +29,10 @@
   <widget class="QPushButton" name="btnTogglePreview">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>260</y>
-     <width>111</width>
-     <height>51</height>
+     <x>115</x>
+     <y>240</y>
+     <width>100</width>
+     <height>50</height>
     </rect>
    </property>
    <property name="text">
@@ -42,10 +42,10 @@
   <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>220</x>
      <y>10</y>
-     <width>231</width>
-     <height>301</height>
+     <width>260</width>
+     <height>310</height>
     </rect>
    </property>
    <property name="tabPosition">
@@ -63,647 +63,648 @@
    <property name="usesScrollButtons">
     <bool>true</bool>
    </property>
-   <widget class="QWidget" name="tab_3">
+   <widget class="QWidget" name="tabSettings">
     <attribute name="title">
      <string>Image settings</string>
     </attribute>
-    <widget class="QWidget" name="formLayoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>-1</x>
-       <y>0</y>
-       <width>201</width>
-       <height>291</height>
-      </rect>
-     </property>
-     <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>ISO:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="comboboxIso">
-        <item>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <layout class="QFormLayout" name="formLayout">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
          <property name="text">
-          <string>100</string>
+          <string>ISO:</string>
          </property>
-        </item>
-        <item>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="comboboxIso">
+         <item>
+          <property name="text">
+           <string>100</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>200</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>320</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>400</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>500</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>640</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>800</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_6">
          <property name="text">
-          <string>200</string>
+          <string>AWB mode</string>
          </property>
-        </item>
-        <item>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>320</string>
+          <string>Brightness</string>
          </property>
-        </item>
-        <item>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_8">
          <property name="text">
-          <string>400</string>
+          <string>Exposure</string>
          </property>
-        </item>
-        <item>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>500</string>
+          <string>Shutter speed</string>
          </property>
-        </item>
-        <item>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QComboBox" name="comboboxShutterSpeed">
+         <item>
+          <property name="text">
+           <string>1/8000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1/4000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1/2000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1/1000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1/500</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1/250</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1/125</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1/60</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1/30</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1/15</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1/8</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1/4</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>0.5</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>4</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>8</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>15</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>30</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_12">
          <property name="text">
-          <string>640</string>
+          <string>Delay</string>
          </property>
-        </item>
-        <item>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QComboBox" name="comboboxDelay">
+         <item>
+          <property name="text">
+           <string>0</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QComboBox" name="comboboxAwbMode">
+         <item>
+          <property name="text">
+           <string>Off</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Auto</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Sunlight</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Cloudy</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Shade</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Tungsten</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Fluorescent</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Incandescent</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Flash</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Horizon</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_14">
          <property name="text">
-          <string>800</string>
+          <string>AWB gain</string>
          </property>
-        </item>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>AWB mode</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Brightness</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>Exposure</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Shutter speed</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QComboBox" name="comboboxShutterSpeed">
-        <item>
-         <property name="text">
-          <string>1/8000</string>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QSlider" name="sliderAwbGain">
+         <property name="maximum">
+          <number>80</number>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1/4000</string>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1/2000</string>
+         <property name="tickPosition">
+          <enum>QSlider::NoTicks</enum>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1/1000</string>
+         <property name="tickInterval">
+          <number>0</number>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1/500</string>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QSlider" name="sliderBrightness">
+         <property name="value">
+          <number>50</number>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1/250</string>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1/125</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1/60</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1/30</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1/15</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1/8</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1/4</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>0.5</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>2</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>4</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>8</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>15</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>30</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_12">
-        <property name="text">
-         <string>Delay</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QComboBox" name="comboboxDelay">
-        <item>
-         <property name="text">
-          <string>0</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>2</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>10</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QComboBox" name="comboboxAwbMode">
-        <item>
-         <property name="text">
-          <string>Off</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Auto</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Sunlight</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Cloudy</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Shade</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Tungsten</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Fluorescent</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Incandescent</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Flash</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Horizon</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_14">
-        <property name="text">
-         <string>AWB gain</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QSlider" name="sliderAwbGain">
-        <property name="maximum">
-         <number>80</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="tickPosition">
-         <enum>QSlider::NoTicks</enum>
-        </property>
-        <property name="tickInterval">
-         <number>0</number>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QSlider" name="sliderBrightness">
-        <property name="value">
-         <number>50</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QComboBox" name="comboboxExposure">
-        <item>
-         <property name="text">
-          <string>Off</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Auto</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Night</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Nightpreview</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Backlight</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Spotlight</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Sports</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Snow</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Beach</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Veryling</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Fixedfps</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Antishake</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Fireworks</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-     </layout>
-    </widget>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QComboBox" name="comboboxExposure">
+         <item>
+          <property name="text">
+           <string>Off</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Auto</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Night</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Nightpreview</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Backlight</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Spotlight</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Sports</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Snow</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Beach</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Veryling</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Fixedfps</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Antishake</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Fireworks</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
    </widget>
-   <widget class="QWidget" name="tab_4">
+   <widget class="QWidget" name="tabTimelapse">
     <attribute name="title">
      <string>Timelapse</string>
     </attribute>
-    <widget class="QWidget" name="formLayoutWidget_2">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>201</width>
-       <height>291</height>
-      </rect>
-     </property>
-     <layout class="QFormLayout" name="formLayout_2">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Delay between</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QSpinBox" name="spinboxTimelapseDelay"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string># of pictures</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QSpinBox" name="spinboxTimelapseCount">
-        <property name="minimum">
-         <number>1</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="0">
+      <layout class="QFormLayout" name="formLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Delay between</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="spinboxTimelapseDelay"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string># of pictures</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QSpinBox" name="spinboxTimelapseCount">
+         <property name="minimum">
+          <number>1</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
    </widget>
-   <widget class="QWidget" name="tab">
+   <widget class="QWidget" name="tabOtherSettings">
     <attribute name="title">
      <string>Other</string>
     </attribute>
-    <widget class="QWidget" name="verticalLayoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>201</width>
-       <height>291</height>
-      </rect>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QCheckBox" name="checkboxLed">
-        <property name="text">
-         <string>Led </string>
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="0">
+      <widget class="QScrollArea" name="scrollAreaOtherSettings">
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="scrollAreaWidgetContents_2">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>210</width>
+          <height>286</height>
+         </rect>
         </property>
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="0" column="0">
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <item>
+            <widget class="QCheckBox" name="checkboxLed">
+             <property name="text">
+              <string>Led </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkboxDenoise">
+             <property name="text">
+              <string>Denoise</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="buttonMaxFps">
+             <property name="text">
+              <string>Force Max FPS</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QFormLayout" name="formLayout_3">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_13">
+               <property name="text">
+                <string>Image format:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QComboBox" name="comboboxImageFormat">
+               <item>
+                <property name="text">
+                 <string>JPEG</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>PNG</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>GIF</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>BMP</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>YUV</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>RGB</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>RGBA</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>BGR</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>BGRA</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_11">
+               <property name="text">
+                <string>Sharpness</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_10">
+               <property name="text">
+                <string>Saturation</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_9">
+               <property name="text">
+                <string>Meter mode</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>Contrast</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QSlider" name="sliderContrast">
+               <property name="minimum">
+                <number>-100</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="label_15">
+               <property name="text">
+                <string>DRC strength</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QComboBox" name="comboboxDrc">
+               <item>
+                <property name="text">
+                 <string>Off</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Low</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Medium</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>High</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QComboBox" name="comboboxMetermode">
+               <item>
+                <property name="text">
+                 <string>Average</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Spot</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Backlit</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Matrix</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QSlider" name="sliderSaturation">
+               <property name="minimum">
+                <number>-100</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSlider" name="sliderSharpness">
+               <property name="minimum">
+                <number>-100</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="checkboxDenoise">
-        <property name="text">
-         <string>Denoise</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="buttonMaxFps">
-        <property name="text">
-         <string>Force Max FPS</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QFormLayout" name="formLayout_3">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_13">
-          <property name="text">
-           <string>Image format:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QComboBox" name="comboboxImageFormat">
-          <item>
-           <property name="text">
-            <string>JPEG</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>PNG</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>GIF</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>BMP</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>YUV</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>RGB</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>RGBA</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>BGR</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>BGRA</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_11">
-          <property name="text">
-           <string>Sharpness</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_10">
-          <property name="text">
-           <string>Saturation</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_9">
-          <property name="text">
-           <string>Meter mode</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_7">
-          <property name="text">
-           <string>Contrast</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QSlider" name="sliderContrast">
-          <property name="minimum">
-           <number>-100</number>
-          </property>
-          <property name="maximum">
-           <number>100</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_15">
-          <property name="text">
-           <string>DRC strength</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QComboBox" name="comboboxDrc">
-          <item>
-           <property name="text">
-            <string>Off</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Low</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Medium</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>High</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QComboBox" name="comboboxMetermode">
-          <item>
-           <property name="text">
-            <string>Average</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Spot</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Backlit</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Matrix</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QSlider" name="sliderSaturation">
-          <property name="minimum">
-           <number>-100</number>
-          </property>
-          <property name="maximum">
-           <number>100</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QSlider" name="sliderSharpness">
-          <property name="minimum">
-           <number>-100</number>
-          </property>
-          <property name="maximum">
-           <number>100</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="ImgViewer" name="widgetImgViewer" native="true">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>30</y>
-     <width>231</width>
-     <height>211</height>
+     <y>10</y>
+     <width>200</width>
+     <height>221</height>
     </rect>
    </property>
   </widget>

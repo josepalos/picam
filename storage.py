@@ -4,7 +4,6 @@ import os.path
 import re
 
 
-IMAGES_DIRECTORY = "./images"
 VALID_FILE_EXTENSIONS = ["jpeg", "png", "gif", "bmp", "yuv", "rgb", "rgba"]
 
 

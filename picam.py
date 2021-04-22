@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import os.path
 import socket
 from subprocess import Popen, PIPE
 import sys
@@ -9,13 +10,17 @@ from PyQt5.QtCore import Qt, QTimer, QObject, QThread, pyqtSignal, QFile, QIODev
 
 import mainwindow
 import img_viewer
-from storage import Storage, IMAGES_DIRECTORY
+from storage import Storage
 from camera import Camera, Image, REAL_CAMERA
 
+BASE_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
+IMAGES_DIRECTORY = os.path.join(BASE_DIRECTORY, "images")
 
 def get_commit():
     # Stackoverflow 65076306
-    process = Popen(["git", "rev-parse", "--short", "HEAD"], stdout=PIPE)
+    process = Popen(["git", "rev-parse", "--short", "HEAD"],
+                    cwd=BASE_DIRECTORY,
+                    stderr=PIPE, stdout=PIPE)
     (commit_hash, err) = process.communicate()
     exit_code = process.wait()
     if exit_code != 0:
@@ -257,7 +262,7 @@ def window(cam: Camera, storage: Storage):
 
 
 def load_stylesheet(app):
-    qss_file = QFile("stylesheet.qss")
+    qss_file = QFile(os.path.join(BASE_DIRECTORY, "stylesheet.qss"))
     if not qss_file.open(QIODevice.ReadOnly | QIODevice.Text):
         logging.getLogger(__name__).warning("Could not load stylesheet")
         return

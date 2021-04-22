@@ -1,8 +1,14 @@
+import os.path
 import shutil
 import time
 from fractions import Fraction
 
 import cv2
+
+
+
+BASE_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
+FAKE_IMAGE = os.path.join(BASE_DIRECTORY, "potato.jpg")
 
 
 class FakePicamera:
@@ -31,11 +37,11 @@ class FakePicamera:
         pass
 
     def capture(self, filename):
-        shutil.copy("potato.jpg", filename)
+        shutil.copy(FAKE_IMAGE, filename)
 
     def capture_continuous(self, raw_capture, format, use_video_port):
         while True:
-            frame = cv2.imread("potato.jpg")
+            frame = cv2.imread(FAKE_IMAGE)
 
             font = cv2.FONT_HERSHEY_SIMPLEX
             cv2.putText(frame, f"{time.time()}",

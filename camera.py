@@ -3,6 +3,8 @@ import logging
 import time
 
 import cv2
+from PyQt5 import QtGui
+
 try:
     from picamera import PiCamera
     from picamera.array import PiRGBArray
@@ -11,8 +13,6 @@ except ModuleNotFoundError:
     from virtualcamera import FakePicamera as PiCamera
     from virtualcamera import FakePiRGBArray as PiRGBArray
     REAL_CAMERA = False
-
-from PyQt5 import QtGui
 
 
 class Image:

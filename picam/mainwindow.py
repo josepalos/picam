@@ -374,4 +374,4 @@ class Ui_Form(object):
         self.labelCommit.setText(_translate("Form", "Project version (commit):"))
         self.labelRealCamera.setText(_translate("Form", "Using real camera:"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabInfo), _translate("Form", "Info"))
-from img_viewer import ImgViewer
+from .img_viewer import ImgViewer

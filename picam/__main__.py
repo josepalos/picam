@@ -10,11 +10,11 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget,
                              QPushButton)
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QFile, QIODevice
 
-import mainwindow
-import img_viewer
-from img_viewer import Shutter, PreviewWidget
-from storage import Storage
-from camera import Camera, REAL_CAMERA
+from . import mainwindow
+from . import img_viewer
+from .img_viewer import Shutter, PreviewWidget
+from .storage import Storage
+from .camera import Camera, REAL_CAMERA
 
 
 BASE_DIRECTORY = os.path.dirname(os.path.realpath(__file__))

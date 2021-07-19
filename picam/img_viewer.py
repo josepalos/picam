@@ -7,9 +7,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
 
 try:
-    from camera import Image
+    from .camera import Image
 except ModuleNotFoundError:
-    from virtualcamera import Image
+    from .virtualcamera import Image
 
 
 class _ImageWidget(QtWidgets.QLabel):

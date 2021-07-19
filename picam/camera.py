@@ -10,8 +10,8 @@ try:
     from picamera.array import PiRGBArray
     REAL_CAMERA = True
 except ModuleNotFoundError:
-    from virtualcamera import FakePicamera as PiCamera
-    from virtualcamera import FakePiRGBArray as PiRGBArray
+    from .virtualcamera import FakePicamera as PiCamera
+    from .virtualcamera import FakePiRGBArray as PiRGBArray
     REAL_CAMERA = False
 
 

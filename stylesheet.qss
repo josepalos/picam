@@ -1,9 +1,16 @@
+QWidget {
+	background-color: black;
+	color: rgb(210, 210, 210);
+}
+
 QPushButton {
     min-height: 40px;
+	background-color: rgb(80, 80, 80);
 }
 
 QComboBox {
     height: 30px;
+	background-color: rgb(80, 80, 80);
 }
 
 QSlider {
@@ -58,11 +65,13 @@ QSlider::handle:horizontal:disabled {
 QCheckBox::indicator {
     width: 30px;
     height: 30px;
+	background-color: rgb(80, 80, 80);
 }
 
 QSpinBox {
     padding-right: 20px;  /* make room for the arrows */
     height: 30px;
+	background-color: rgb(80, 80, 80);
 }
 
 QSpinBox::up-button {

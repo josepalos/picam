@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -42,8 +42,8 @@
     <widget class="QPushButton" name="btnTogglePreview">
      <property name="geometry">
       <rect>
-       <x>340</x>
-       <y>210</y>
+       <x>350</x>
+       <y>70</y>
        <width>100</width>
        <height>50</height>
       </rect>
@@ -55,8 +55,8 @@
     <widget class="QPushButton" name="btnShutter">
      <property name="geometry">
       <rect>
-       <x>340</x>
-       <y>150</y>
+       <x>350</x>
+       <y>10</y>
        <width>100</width>
        <height>50</height>
       </rect>
@@ -70,7 +70,7 @@
     <attribute name="title">
      <string>Presets</string>
     </attribute>
-    <widget class="QWidget" name="gridLayoutWidget">
+    <widget class="PresetsWidget" name="presetsWidget" native="true">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -79,71 +79,6 @@
        <height>251</height>
       </rect>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="2" column="2">
-       <widget class="QPushButton" name="pushButton_4">
-        <property name="text">
-         <string>PushButton</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QPushButton" name="pushButton">
-        <property name="text">
-         <string>PushButton</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="pushButton_5">
-        <property name="text">
-         <string>PushButton</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QPushButton" name="pushButton_2">
-        <property name="text">
-         <string>PushButton</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="pushButton_3">
-        <property name="text">
-         <string>PushButton</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QPushButton" name="pushButton_6">
-        <property name="text">
-         <string>PushButton</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="pushButton_7">
-        <property name="text">
-         <string>PushButton</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QPushButton" name="pushButton_8">
-        <property name="text">
-         <string>PushButton</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="pushButton_9">
-        <property name="text">
-         <string>PushButton</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_2">
@@ -836,7 +771,13 @@
   <customwidget>
    <class>ImgViewer</class>
    <extends>QWidget</extends>
-   <header>img_viewer.h</header>
+   <header>picam/img_viewer.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PresetsWidget</class>
+   <extends>QWidget</extends>
+   <header>picam/presets.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget,
                              QPushButton)
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QFile, QIODevice
 
+from picam.presets import Preset
 from . import mainwindow
 from . import img_viewer
 from .img_viewer import Shutter, PreviewWidget
@@ -77,7 +78,7 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
         self.comboboxIso.currentTextChanged.connect(
             lambda val: self.cam.set_iso(int(val)))
         self.sliderAwbGain.valueChanged.connect(
-            lambda v: self.cam.set_awb_gain(float(v) / 10))
+            lambda v: self.cam.set_awb_gains(float(v) / 10))
         self.comboboxAwbMode.currentTextChanged.connect(
             self._set_awb_mode)
         self.sliderBrightness.valueChanged.connect(
@@ -119,10 +120,7 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
         self.comboboxDrc.currentTextChanged.connect(
             lambda val: print(val))
         self.comboboxDrc.setEnabled(False)
-        # enable scroll on the last tab
-        QScroller.grabGesture(
-            self.scrollAreaOtherSettings.viewport(), QScroller.LeftMouseButtonGesture
-        )
+
         # (3) Info
         self.update_info()  # TODO call this periodically?
 
@@ -271,6 +269,7 @@ class Controller(QMainWindow):
 
         # windows
         self.settings = SettingsWidget(cam, shutter)
+        self.settings.presetsWidget.apply_preset.connect(self._apply_preset)
 
         self.full_preview = FullscreenViewer(shutter)
         self.full_preview.set_camera(cam)
@@ -291,6 +290,9 @@ class Controller(QMainWindow):
             self.stack.addWidget(page)
 
         self.setCentralWidget(self.stack)
+
+    def _apply_preset(self, preset: Preset):
+        print(preset)
 
     def toggle_fullscreen(self, value: bool):
         if value is True:

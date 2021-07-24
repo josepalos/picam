@@ -5,6 +5,8 @@ import time
 import cv2
 from PyQt5 import QtGui
 
+from .presets import Preset
+
 try:
     from picamera import PiCamera
     from picamera.array import PiRGBArray
@@ -63,7 +65,7 @@ class Camera:
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self.close()
 
-    def set_awb_gain(self, gain: float):
+    def set_awb_gains(self, gain: float):
         self._camera.awb_gains = gain
 
     def set_awb_mode(self, mode: str):
@@ -130,3 +132,13 @@ class Camera:
             # clear the stream for the next frame
             self._raw_capture.truncate(0)
             yield image
+
+    def apply_preset(self, preset: Preset):
+        self.set_awb_gains(preset.awb_gains)
+        self.set_awb_mode(preset.awb_mode)
+        self.set_iso(preset.iso)
+        self.set_brightness(preset.brightness)
+        self.set_contrast(preset.contrast)
+        self.set_exposure(preset.exposure)
+        self.set_shutter_speed(preset.shutter_speed)
+        self.set_led(preset.led)

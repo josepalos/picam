@@ -3,6 +3,10 @@ QWidget {
 	color: rgb(210, 210, 210);
 }
 
+PresetWidget {
+    background-color: white;
+}
+
 QPushButton {
     min-height: 40px;
 	background-color: rgb(80, 80, 80);

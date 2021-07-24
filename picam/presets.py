@@ -1,14 +1,16 @@
 import dataclasses
+import glob
 import json
 import logging
+import os.path
 from fractions import Fraction
 from typing import Tuple, Union, Any, List
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 
-# Typing
 from picam.layouts import FlowLayout
 
+# Typing
 Gain = Tuple[float, Fraction]
 
 
@@ -101,9 +103,6 @@ class PresetsWidget(QtWidgets.QWidget):
         self.layout = FlowLayout(self)
         self.setLayout(self.layout)
 
-        for name, preset in self._load_presets():
-            self.add_preset(name, preset)
-
     def add_preset(self, name, preset):
         if name in self._presets:
             raise Exception("Preset already exists")
@@ -128,8 +127,9 @@ class PresetsWidget(QtWidgets.QWidget):
             del self._presets[name]
             self.layout.removeWidget(wPreset)
 
-    def _load_presets(self) -> List[Tuple[str, Preset]]:
-        return [
-            (f"Preset_{i}", Preset.default())
-            for i in range(5)
-        ]
+    def load_presets(self, presets_folder):
+        for preset_file in glob.glob(os.path.join(presets_folder, "*.preset")):
+            filename = os.path.basename(preset_file)
+            name = os.path.splitext(filename)[0]
+            preset = Preset.from_file(preset_file)
+            self.add_preset(name, preset)

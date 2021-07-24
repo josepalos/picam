@@ -19,7 +19,10 @@ from .camera import Camera, REAL_CAMERA
 
 
 BASE_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
-IMAGES_DIRECTORY = os.path.join(BASE_DIRECTORY, "images")
+IMAGES_DIRECTORY = os.path.realpath(
+    os.path.join(BASE_DIRECTORY, "..", "images"))
+PRESETS_DIRECTORY = os.path.realpath(
+    os.path.join(BASE_DIRECTORY, "..", "presets"))
 CAPTURE_PREVIEW_TIMEOUT = 5
 
 
@@ -270,6 +273,7 @@ class Controller(QMainWindow):
         # windows
         self.settings = SettingsWidget(cam, shutter)
         self.settings.presetsWidget.apply_preset.connect(self._apply_preset)
+        self.settings.presetsWidget.load_presets(PRESETS_DIRECTORY)
 
         self.full_preview = FullscreenViewer(shutter)
         self.full_preview.set_camera(cam)

@@ -1,0 +1,10 @@
+{
+    "shutter_speed": 1000,
+    "awb_gains": [0, 0],
+    "awb_mode": "auto",
+    "iso": 100,
+    "brightness": 0,
+    "contrast": 0,
+    "exposure": 0,
+    "led": false
+}

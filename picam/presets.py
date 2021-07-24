@@ -1,5 +1,6 @@
 import dataclasses
 import json
+import logging
 from fractions import Fraction
 from typing import Tuple, Union, Any, List
 
@@ -57,6 +58,7 @@ class Preset:
 
 class PresetWidget(QtWidgets.QWidget):
     apply_preset = QtCore.pyqtSignal(Preset)
+    delete_preset = QtCore.pyqtSignal(str)
 
     def __init__(self, preset_name: str, preset: Preset, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -65,13 +67,19 @@ class PresetWidget(QtWidgets.QWidget):
 
         # GUI elements
         self.button = QtWidgets.QPushButton("Apply preset")
+        self.delete = QtWidgets.QPushButton("Delete preset")
         layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(QtWidgets.QLabel(preset_name))
         layout.addWidget(self.button)
+        layout.addWidget(self.delete)
         self.setLayout(layout)
 
         # Connections
         self.button.clicked.connect(self._apply_preset)
+        self.delete.clicked.connect(self._delete)
+
+    def _delete(self):
+        self.delete_preset.emit(self.preset_name)
 
     def _apply_preset(self):
         self.apply_preset.emit(self.preset)
@@ -88,19 +96,40 @@ class PresetsWidget(QtWidgets.QWidget):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._presets = self._load_presets()
+        self._presets = dict()
 
         self.layout = FlowLayout(self)
-
-        for name, preset in self._presets:
-            wPreset = PresetWidget(name, preset)
-            self.layout.addWidget(wPreset)
-            wPreset.apply_preset.connect(self.apply_preset)
-
         self.setLayout(self.layout)
+
+        for name, preset in self._load_presets():
+            self.add_preset(name, preset)
+
+    def add_preset(self, name, preset):
+        if name in self._presets:
+            raise Exception("Preset already exists")
+        wPreset = PresetWidget(name, preset)
+
+        self._presets[name] = wPreset
+        self.layout.addWidget(wPreset)
+
+        wPreset.apply_preset.connect(self.apply_preset)
+        wPreset.delete_preset.connect(self.delete_preset)
+
+    def delete_preset(self, name: str):
+        if name not in self._presets:
+            logging.getLogger(__name__).warning(
+                "Trying to delete a non-existing preset")
+            return
+
+        messageBox = QtWidgets.QMessageBox.question(
+            self, "Delete?", f"Are you sure to delete preset '{name}'?")
+        if messageBox == QtWidgets.QMessageBox.Yes:
+            wPreset = self._presets[name]
+            del self._presets[name]
+            self.layout.removeWidget(wPreset)
 
     def _load_presets(self) -> List[Tuple[str, Preset]]:
         return [
             (f"Preset_{i}", Preset.default())
-            for i in range(20)
+            for i in range(5)
         ]

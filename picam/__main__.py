@@ -127,6 +127,10 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
         # (3) Info
         self.update_info()  # TODO call this periodically?
 
+    def apply_preset(self, preset: Preset):
+        self.cam.apply_preset(preset)
+        # TODO update settings selectors
+
     def update_info(self):
         ip = get_ip()
 
@@ -272,7 +276,8 @@ class Controller(QMainWindow):
 
         # windows
         self.settings = SettingsWidget(cam, shutter)
-        self.settings.presetsWidget.apply_preset.connect(self._apply_preset)
+        self.settings.presetsWidget.apply_preset.connect(
+            self.settings.apply_preset)
         self.settings.presetsWidget.load_presets(PRESETS_DIRECTORY)
 
         self.full_preview = FullscreenViewer(shutter)
@@ -294,9 +299,6 @@ class Controller(QMainWindow):
             self.stack.addWidget(page)
 
         self.setCentralWidget(self.stack)
-
-    def _apply_preset(self, preset: Preset):
-        print(preset)
 
     def toggle_fullscreen(self, value: bool):
         if value is True:

@@ -1,6 +1,6 @@
 {
     "shutter_speed": 1000,
-    "awb_gains": [0, 0],
+    "awb_gains": [0.0, 0.0],
     "awb_mode": "auto",
     "iso": 100,
     "brightness": 0,

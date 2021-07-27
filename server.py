@@ -14,7 +14,18 @@ class NotAllowedException(Exception):
 class CameraProxy:
     def __init__(self, camera):
         self._camera = camera
+        self._is_open = False
         self._preview_generator = None
+
+    def open(self):
+        if self._is_open:
+            return
+        self._camera.open()
+        self._is_open = True
+
+    def close(self):
+        self._camera.close()
+        self._is_open = False
 
     def __getattr__(self, item):
         return getattr(self._camera, item)

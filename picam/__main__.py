@@ -15,7 +15,7 @@ from . import mainwindow
 from . import img_viewer
 from .img_viewer import Shutter, PreviewWidget
 from .storage import Storage
-from .camera import Camera, REAL_CAMERA
+from .camera import Camera, REAL_CAMERA, settings
 
 
 BASE_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
@@ -78,6 +78,8 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
 
         # Tabs:
         # (0) Image settings
+        self._set_settings_options()
+
         self.comboboxIso.currentTextChanged.connect(
             lambda val: self.cam.set_iso(int(val)))
         self.sliderAwbGain.valueChanged.connect(
@@ -92,6 +94,7 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
             lambda val: self.cam.set_shutter_speed(val))
         self.comboboxDelay.currentTextChanged.connect(
             lambda val: self._shutter.set_delay(int(val)))
+
         # (1) Timelapse
         self.spinboxTimelapseDelay.valueChanged.connect(
             lambda val: print(val))
@@ -99,6 +102,7 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
         self.spinboxTimelapseCount.valueChanged.connect(
             lambda val: print(val))
         self.spinboxTimelapseCount.setEnabled(False)
+
         # (2) Other
         self.checkboxLed.stateChanged.connect(self._set_led)
         self.checkboxDenoise.stateChanged.connect(
@@ -126,6 +130,22 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
 
         # (3) Info
         self.update_info()  # TODO call this periodically?
+
+    def _set_settings_options(self):
+        self.comboboxIso.clear()
+        self.comboboxIso.addItems(map(str, settings.ISOS))
+        self.comboboxAwbMode.clear()
+        self.comboboxAwbMode.addItems(map(lambda v: v.value, settings.AwbMode))
+        self.comboboxExposure.clear()
+        self.comboboxExposure.addItems(map(lambda v: v.value, settings.Exposure))
+        self.comboboxShutterSpeed.clear()
+        self.comboboxShutterSpeed.addItems(map(str, settings.SHUTTER_SPEEDS))
+        self.comboboxDelay.clear()
+        self.comboboxDelay.addItems(map(str, settings.DELAYS))
+        self.comboboxMetermode.clear()
+        self.comboboxMetermode.addItems(map(lambda v: v.value, settings.MeterMode))
+        self.comboboxDrc.clear()
+        self.comboboxDrc.addItems(map(lambda v: v.value, settings.DrcStrength))
 
     def apply_preset(self, preset: Preset):
         self.cam.apply_preset(preset)

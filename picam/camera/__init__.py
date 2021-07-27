@@ -5,15 +5,17 @@ import time
 import cv2
 from PyQt5 import QtGui
 
-from .presets import Preset
+from ..presets import Preset
 
 try:
     from picamera import PiCamera
     from picamera.array import PiRGBArray
+
     REAL_CAMERA = True
 except ModuleNotFoundError:
     from .virtualcamera import FakePicamera as PiCamera
     from .virtualcamera import FakePiRGBArray as PiRGBArray
+
     REAL_CAMERA = False
 
 
@@ -28,6 +30,7 @@ class Image:
         bytes_per_line = ch * w
         return QtGui.QImage(rgb_image.data, w, h, bytes_per_line,
                             QtGui.QImage.Format_RGB888)
+
     @staticmethod
     def from_file(filename):
         cv2_img = cv2.imread(filename)
@@ -74,7 +77,7 @@ class Camera:
     def set_iso(self, value: int):
         logging.getLogger(__name__).debug("Set iso value to %d", value)
         self._camera.iso = value
-    
+
     def set_brightness(self, value: int):
         logging.getLogger(__name__).debug("Set brightness value to %d", value)
         self._camera.brightness = value
@@ -85,7 +88,7 @@ class Camera:
 
     def set_exposure(self, value):
         self._camera.exposure_mode = value
-    
+
     def maximize_fps(self):
         current_shutter_speed = self.get_exposure_speed()
         max_fps = Fraction(current_shutter_speed, 1000000)
@@ -103,10 +106,12 @@ class Camera:
             microseconds = int(seconds * 1000000)
 
         if 1000000 / self._camera.framerate < microseconds:
-            logging.getLogger(__name__).warning("Framerate is too fast for this shutter speed")
+            logging.getLogger(__name__).warning(
+                "Framerate is too fast for this shutter speed")
             if self._framerate is None:
-                new_framerate = Fraction(1000000/microseconds)
-                logging.getLogger(__name__).info("Changing the framerate to be %s", new_framerate)
+                new_framerate = Fraction(1000000 / microseconds)
+                logging.getLogger(__name__).info(
+                    "Changing the framerate to be %s", new_framerate)
                 self._camera.framerate = new_framerate
 
         logging.getLogger(__name__).debug("Set shutter speed value to %s (%d)",

@@ -308,10 +308,14 @@ class Controller(QMainWindow):
 
 
 def window(cam: Camera, storage: Storage):
-    app = QApplication(sys.argv)
-    window = Controller(cam, storage)
+    shutter = img_viewer.Shutter(cam, storage)
 
-    window.showFullScreen()
+    app = QApplication(sys.argv)
+    load_stylesheet(app)
+    controller = Controller(cam, shutter)
+    # controller.showFullScreen()
+    controller.show()
+    controller.resize(480, 320)
 
     return app.exec_()
 
@@ -331,15 +335,7 @@ def main():
     storage.start()
 
     with Camera() as cam:
-        shutter = img_viewer.Shutter(cam, storage)
-
-        app = QApplication(sys.argv)
-        load_stylesheet(app)
-        controller = Controller(cam, shutter)
-        # controller.showFullScreen()
-        controller.show()
-        controller.resize(480, 320)
-        sys.exit(app.exec_())
+        sys.exit(window(cam, storage))
 
 
 if __name__ == "__main__":

@@ -3,7 +3,6 @@ import argparse
 import client
 import picam
 import server
-from storage import VALID_FILE_EXTENSIONS
 
 
 def parse_args():
@@ -19,8 +18,6 @@ def parse_args():
     client_parser = mode.add_parser("client")
     client_parser.add_argument("--address", default="localhost")
     client_parser.add_argument("--port", default=8000)
-    client_parser.add_argument("--extension", default="jpeg",
-                               choices=VALID_FILE_EXTENSIONS)
 
     return parser.parse_args()
 
@@ -30,7 +27,7 @@ def server_mode(args):
 
 
 def client_mode(args):
-    client.main(args.address, args.port, args.extension)
+    client.main(args.address, args.port)
 
 
 def gui_mode(args):

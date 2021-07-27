@@ -1,22 +1,22 @@
 import sys
 import traceback
 import xmlrpc.client
+
 import server
+import picam
 
 
-def main(address, port, extension):
+def main(address, port):
     s = xmlrpc.client.ServerProxy(f"http://{address}:{port}")
 
     camera = s.camera  # type: server.CameraWrapper
     storage = s.storage  # type: server.StorageWrapper
 
-
     camera.open()
     storage.start()
+
     try:
-        new_name = storage.get_new_name(extension)
-        print(new_name)
-        camera.take_picture(new_name)
+        picam.window(camera, storage)
     except xmlrpc.client.Fault as err:
         print(err, file=sys.stderr)
     except Exception:

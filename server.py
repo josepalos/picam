@@ -1,4 +1,7 @@
+from io import BytesIO
 from xmlrpc.server import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
+
+import numpy.lib.format
 
 from camera import Camera
 from storage import Storage
@@ -8,15 +11,32 @@ class NotAllowedException(Exception):
     pass
 
 
-class CameraWrapper(Camera):
+class CameraProxy:
+    def __init__(self, camera):
+        self._camera = camera
+        self._preview_generator = None
+
+    def __getattr__(self, item):
+        return getattr(self._camera, item)
+
     def get_exposure_speed(self):
-        return float(super().get_exposure_speed())
+        return float(self._camera.get_exposure_speed())
+
+    def start_preview(self):
+        self._preview_generator = self._camera.preview()
+
+    def next_preview_frame(self):
+        next_frame = next(self._preview_generator)
+        f = BytesIO()
+        numpy.lib.format.write_array(f, next_frame._image)
+        val = f.getvalue()
+        return val
 
     def preview(self):
         raise NotAllowedException
 
 
-class StorageWrapper(Storage):
+class StorageProxy(Storage):
     pass
 
 
@@ -26,10 +46,10 @@ class Wrapper:
         self.storage = None
 
     def initialize_camera(self, *args, **kwargs):
-        self.camera = CameraWrapper(*args, **kwargs)
+        self.camera = CameraProxy(Camera(*args, **kwargs))
 
     def initialize_storage(self, *args, **kwargs):
-        self.storage = StorageWrapper(*args, **kwargs)
+        self.storage = StorageProxy(*args, **kwargs)
 
 
 class RequestHandler(SimpleXMLRPCRequestHandler):

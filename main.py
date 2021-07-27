@@ -12,12 +12,12 @@ def parse_args():
 
     server_parser = mode.add_parser("server")
     server_parser.add_argument("--address", default="localhost")
-    server_parser.add_argument("--port", default=8000)
+    server_parser.add_argument("--port", default=8000, type=int)
     server_parser.add_argument("--storage-path", default="./images")
 
     client_parser = mode.add_parser("client")
     client_parser.add_argument("--address", default="localhost")
-    client_parser.add_argument("--port", default=8000)
+    client_parser.add_argument("--port", default=8000, type=int)
 
     return parser.parse_args()
 

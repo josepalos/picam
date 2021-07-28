@@ -61,9 +61,10 @@ class _ShutterWorker(QObject):
     finished = pyqtSignal()
     captured = pyqtSignal(Image)
 
-    def __init__(self, camera, filename, delay):
+    def __init__(self, camera, storage, filename, delay):
         super().__init__()
         self.camera = camera
+        self.storage = storage
         self.filename = filename
         self.delay = delay
 
@@ -77,7 +78,7 @@ class _ShutterWorker(QObject):
         logging.getLogger(__name__).info("Image saved at %s", self.filename)
         logging.getLogger(__name__).debug("Image took %d seconds", end - start)
 
-        self.captured.emit(Image.from_file(self.filename))
+        self.captured.emit(self.storage.get_image(self.filename))
         self.finished.emit()
 
 
@@ -102,7 +103,8 @@ class Shutter(QObject):
         filename = self.storage.get_new_name(self.capture_format)
 
         self._thread = QThread()
-        self._worker = _ShutterWorker(self.camera, filename, self._delay)
+        self._worker = _ShutterWorker(self.camera, self.storage, filename,
+                                      self._delay)
         # move the worker to the thread
         self._worker.moveToThread(self._thread)
 

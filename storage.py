@@ -3,6 +3,10 @@ import os
 import os.path
 import re
 
+try:
+    from camera import Image
+except ModuleNotFoundError:
+    from virtualcamera import Image
 
 VALID_FILE_EXTENSIONS = ["jpeg", "png", "gif", "bmp", "yuv", "rgb", "rgba"]
 
@@ -42,4 +46,6 @@ class Storage:
         self._next_id += 1
         return os.path.join(self.path, img_name)
 
+    def get_image(self, filename):
+        return Image.from_file(filename)
 

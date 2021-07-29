@@ -5,7 +5,7 @@ import time
 import cv2
 from PyQt5 import QtGui
 
-from .settings import CameraSetting
+from .settings import CameraSetting, ShutterSpeed
 from ..presets import Preset
 
 try:
@@ -48,12 +48,23 @@ class Camera:
             CameraSetting.RESOLUTION: resolution,
             CameraSetting.FRAMERATE: framerate
         }
+        print(self._settings)
 
     def set_setting(self, setting: CameraSetting, value):
+        setattr(self._camera, setting.value.camera_setter_name, value)
         self._settings[setting] = value
 
     def get_setting(self, setting: CameraSetting):
-        return self._settings.get(setting, None)
+        if setting in self._settings:
+            return self._settings[setting]
+
+        value = getattr(self._camera, setting.value.camera_getter_name)
+        self._settings[setting] = value
+        return value
+
+    def refresh_settings(self):
+        # TODO
+        raise NotImplementedError
 
     def open(self):
         framerate = self.get_setting(CameraSetting.FRAMERATE)
@@ -64,8 +75,7 @@ class Camera:
             framerate=framerate, sensor_mode=0)
         self._raw_capture = PiRGBArray(self._camera)
 
-        self.shutter_speed = 0  # auto
-        self.set_setting(CameraSetting.SHUTTER_SPEED, 0)
+        self.set_setting(CameraSetting.SHUTTER_SPEED, ShutterSpeed.auto.value)
 
         time.sleep(0.1)  # warm up
 
@@ -81,35 +91,8 @@ class Camera:
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self.close()
 
-    def set_awb_gains(self, gains: float):
-        self.set_setting(CameraSetting.AWB_GAINS, gains)
-        self._camera.awb_gains = gains
-
-    def set_awb_mode(self, mode: str):
-        self.set_setting(CameraSetting.AWB_MODE, mode)
-        self._camera.awb_mode = mode
-
-    def set_iso(self, value: int):
-        self.set_setting(CameraSetting.ISO, value)
-        logging.getLogger(__name__).debug("Set iso value to %d", value)
-        self._camera.iso = value
-
-    def set_brightness(self, value: int):
-        self.set_setting(CameraSetting.BRIGHTNESS, value)
-        logging.getLogger(__name__).debug("Set brightness value to %d", value)
-        self._camera.brightness = value
-
-    def set_contrast(self, value: int):
-        self.set_setting(CameraSetting.CONTRAST, value)
-        logging.getLogger(__name__).debug("Set contrast value to %d", value)
-        self._camera.contrast = value
-
-    def set_exposure(self, value):
-        self.set_setting(CameraSetting.EXPOSURE, value)
-        self._camera.exposure_mode = value
-
     def maximize_fps(self):
-        current_shutter_speed = self.get_exposure_speed()
+        current_shutter_speed = self.get_setting(CameraSetting.SHUTTER_SPEED)
         max_fps = Fraction(current_shutter_speed, 1000000)
         logging.getLogger(__name__).debug("Having exposure speed of %f, the"
                                           " maximum framerate is %s",
@@ -128,7 +111,7 @@ class Camera:
         if 1000000 / self._camera.framerate < microseconds:
             logging.getLogger(__name__).warning(
                 "Framerate is too fast for this shutter speed")
-            if self._framerate is None:
+            if self.get_setting(CameraSetting.FRAMERATE) is None:
                 new_framerate = Fraction(1000000 / microseconds)
                 logging.getLogger(__name__).info(
                     "Changing the framerate to be %s", new_framerate)
@@ -137,15 +120,6 @@ class Camera:
         logging.getLogger(__name__).debug("Set shutter speed value to %s (%d)",
                                           value, microseconds)
         self.set_setting(CameraSetting.SHUTTER_SPEED, microseconds)
-        self._camera.shutter_speed = microseconds
-
-    def set_led(self, value: bool):
-        self.set_setting(CameraSetting.LED, value)
-        logging.getLogger(__name__).debug("Set led value to %s", value)
-        self._camera.led = value
-
-    def get_exposure_speed(self):
-        return self._camera.exposure_speed
 
     def take_picture(self, filename: str):
         logging.getLogger(__name__).debug("Take new picture")
@@ -161,11 +135,11 @@ class Camera:
             yield image
 
     def apply_preset(self, preset: Preset):
-        self.set_awb_gains(preset.awb_gains)
-        self.set_awb_mode(preset.awb_mode)
-        self.set_iso(preset.iso)
-        self.set_brightness(preset.brightness)
-        self.set_contrast(preset.contrast)
-        self.set_exposure(preset.exposure)
-        self.set_shutter_speed(preset.shutter_speed)
-        self.set_led(preset.led)
+        self.set_setting(CameraSetting.AWB_GAINS, preset.awb_gains)
+        self.set_setting(CameraSetting.AWB_MODE, preset.awb_mode)
+        self.set_setting(CameraSetting.ISO, preset.iso)
+        self.set_setting(CameraSetting.BRIGHTNESS, preset.brightness)
+        self.set_setting(CameraSetting.CONTRAST, preset.contrast)
+        self.set_setting(CameraSetting.EXPOSURE, preset.exposure)
+        self.set_setting(CameraSetting.SHUTTER_SPEED, preset.shutter_speed)
+        self.set_setting(CameraSetting.LED, preset.led)

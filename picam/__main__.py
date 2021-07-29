@@ -15,8 +15,7 @@ from . import mainwindow
 from . import img_viewer
 from .img_viewer import Shutter, PreviewWidget
 from .storage import Storage
-from .camera import Camera, REAL_CAMERA, settings
-
+from .camera import Camera, REAL_CAMERA, settings, CameraSetting
 
 _FILE_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
 BASE_DIRECTORY = os.path.realpath(os.path.join(_FILE_DIRECTORY, ".."))
@@ -80,15 +79,15 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
         self._set_settings_options()
 
         self.comboboxIso.currentTextChanged.connect(
-            lambda val: self.cam.set_iso(int(val)))
+            lambda val: self.cam.set_setting(CameraSetting.ISO, int(val)))
         self.sliderAwbGain.valueChanged.connect(
-            lambda v: self.cam.set_awb_gains(float(v) / 10))
+            lambda v: self.cam.set_setting(CameraSetting.AWB_GAINS, float(v) / 10))
         self.comboboxAwbMode.currentTextChanged.connect(
             self._set_awb_mode)
         self.sliderBrightness.valueChanged.connect(
-            lambda val: self.cam.set_brightness(int(val)))
+            lambda val: self.cam.set_setting(CameraSetting.BRIGHTNESS, int(val)))
         self.comboboxExposure.currentTextChanged.connect(
-            lambda v: self.cam.set_exposure(v.lower()))
+            lambda v: self.cam.set_setting(CameraSetting.EXPOSURE, v.lower()))
         self.comboboxShutterSpeed.currentTextChanged.connect(
             lambda val: self.cam.set_shutter_speed(val))
         self.comboboxDelay.currentTextChanged.connect(
@@ -122,7 +121,7 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
             lambda val: print(val))
         self.comboboxMetermode.setEnabled(False)
         self.sliderContrast.valueChanged.connect(
-            lambda val: self.cam.set_contrast(int(val)))
+            lambda val: self.cam.set_setting(CameraSetting.CONTRAST, int(val)))
         self.comboboxDrc.currentTextChanged.connect(
             lambda val: print(val))
         self.comboboxDrc.setEnabled(False)
@@ -159,19 +158,21 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
 
     def _init_camera(self, cam):
         self.cam = cam
+
+        shutter_speed = self.cam.get_setting(CameraSetting.SHUTTER_SPEED)
         logging.getLogger(__name__).info("Camera exposure speed is: %s",
-                                         self.cam.get_exposure_speed())
-        self.cam.set_led(False)
+                                         shutter_speed)
+        self.cam.set_setting(CameraSetting.LED, False)
 
     def _set_extension(self, value: str):
         self._shutter.capture_format = value.lower()
 
     def _set_awb_mode(self, value: str):
         self.sliderAwbGain.setEnabled(value == "Off")
-        self.cam.set_awb_mode(value.lower())
+        self.cam.set_setting(CameraSetting.AWB_MODE, value.lower())
 
     def _set_led(self, value):
-        self.cam.set_led(bool(value))
+        self.cam.set_setting(CameraSetting.LED, bool(value))
 
     def pressed_shutter(self):
         if self.previewing:

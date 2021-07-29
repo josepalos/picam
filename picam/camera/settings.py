@@ -65,6 +65,7 @@ class Exposure(Enum):
 
 
 class ShutterSpeed(enum.Enum):
+    auto = 0
     s_1_8000 = Fraction(1, 8000)
     s_1_4000 = Fraction(1, 4000)
     s_1_2000 = Fraction(1, 2000)
@@ -93,7 +94,7 @@ class CameraSetting(enum.Enum):
     BRIGHTNESS = _RangeSetting("brightness", "brightness", 50, 0, 99)
     CONTRAST = _RangeSetting("contrast", "contrast", 0, -100, 100)
     EXPOSURE = _ChoiceSetting("exposure", "exposure", Exposure.AUTO, Exposure)
-    SHUTTER_SPEED = _ChoiceSetting("shutter_speed", "exposure_speed", None, ShutterSpeed)
+    SHUTTER_SPEED = _ChoiceSetting("exposure_speed", "shutter_speed", None, ShutterSpeed)
     LED = _Setting("led", "led", True)
 
 

@@ -1,13 +1,38 @@
+import enum
 from collections import namedtuple
+from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
+from numbers import Number
+from typing import Any
 
-Range = namedtuple("Range", "min max default")
+
+@dataclass
+class _Setting:
+    camera_getter_name: str
+    camera_setter_name: str
+    default: Any
 
 
-ISOS = [100, 200, 320, 400, 500, 640, 800]
+@dataclass
+class _RangeSetting(_Setting):
+    min: Number
+    max: Number
 
-AWB_GAIN_RANGE = Range(0, 80, 0)
+
+@dataclass
+class _ChoiceSetting(_Setting):
+    choices: enum.Enum.__class__
+
+
+class Iso(enum.Enum):
+    iso100 = 100
+    iso200 = 200
+    iso320 = 320
+    iso400 = 400
+    iso500 = 500
+    iso640 = 640
+    iso800 = 800
 
 
 class AwbMode(Enum):
@@ -21,9 +46,6 @@ class AwbMode(Enum):
     INCANDESCENT = "Incandescent"
     FLASH = "Flash"
     HORIZON = "Horizon"
-
-
-BRIGHTNESS_RANGE = Range(0, 99, 50)
 
 
 class Exposure(Enum):
@@ -41,25 +63,41 @@ class Exposure(Enum):
     ANTI_SHAKE = "Antishake"
     FIREWORKS = "Fireworks"
 
-SHUTTER_SPEEDS = [
-    Fraction(1, 8000),
-    Fraction(1, 4000),
-    Fraction(1, 2000),
-    Fraction(1, 1000),
-    Fraction(1, 500),
-    Fraction(1, 250),
-    Fraction(1, 125),
-    Fraction(1, 60),
-    Fraction(1, 30),
-    Fraction(1, 15),
-    Fraction(1, 8),
-    Fraction(1, 4),
-    Fraction(1, 2),
-    1,
-    2,
-    4,
-    6
-]
+
+class ShutterSpeed(enum.Enum):
+    s_1_8000 = Fraction(1, 8000)
+    s_1_4000 = Fraction(1, 4000)
+    s_1_2000 = Fraction(1, 2000)
+    s_1_1000 = Fraction(1, 1000)
+    s_1_500 = Fraction(1, 500)
+    s_1_250 = Fraction(1, 250)
+    s_1_125 = Fraction(1, 125)
+    s_1_60 = Fraction(1, 60)
+    s_1_30 = Fraction(1, 30)
+    s_1_15 = Fraction(1, 15)
+    s_1_8 = Fraction(1, 8)
+    s_1_4 = Fraction(1, 4)
+    s_1_2 = Fraction(1, 2)
+    s_1 = 1
+    s_2 = 2
+    s_4 = 4
+    s_6 = 6
+
+
+class CameraSetting(enum.Enum):
+    RESOLUTION = _Setting("resolution", "resolution", None)
+    FRAMERATE = _Setting("framerate", "framerate", None)
+    AWB_GAINS = _RangeSetting("awb_gain", "awb_gain", 0, 0, 80)  # TODO accept pairs of values
+    AWB_MODE = _ChoiceSetting("awb_mode", "awb_mode", AwbMode.AUTO, AwbMode)
+    ISO = _ChoiceSetting("iso", "iso", Iso.iso100, Iso)
+    BRIGHTNESS = _RangeSetting("brightness", "brightness", 50, 0, 99)
+    CONTRAST = _RangeSetting("contrast", "contrast", 0, -100, 100)
+    EXPOSURE = _ChoiceSetting("exposure", "exposure", Exposure.AUTO, Exposure)
+    SHUTTER_SPEED = _ChoiceSetting("shutter_speed", "exposure_speed", None, ShutterSpeed)
+    LED = _Setting("led", "led", True)
+
+
+Range = namedtuple("Range", "min max default")
 
 DELAYS = [0, 2, 10]
 
@@ -73,9 +111,6 @@ class MeterMode(Enum):
     SPOT = "Spot"
     BACKLIT = "Backlit"
     MATRIX = "Matrix"
-
-
-CONTRAST_RANGE = Range(-100, 100, 0)
 
 
 class DrcStrength(Enum):

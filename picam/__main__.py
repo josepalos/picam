@@ -132,13 +132,13 @@ class SettingsWidget(QWidget, mainwindow.Ui_Form):
 
     def _set_settings_options(self):
         self.comboboxIso.clear()
-        self.comboboxIso.addItems(map(str, settings.ISOS))
+        self.comboboxIso.addItems(map(lambda v: str(v.value), settings.Iso))
         self.comboboxAwbMode.clear()
         self.comboboxAwbMode.addItems(map(lambda v: v.value, settings.AwbMode))
         self.comboboxExposure.clear()
         self.comboboxExposure.addItems(map(lambda v: v.value, settings.Exposure))
         self.comboboxShutterSpeed.clear()
-        self.comboboxShutterSpeed.addItems(map(str, settings.SHUTTER_SPEEDS))
+        self.comboboxShutterSpeed.addItems(map(lambda v: str(v.value), settings.ShutterSpeed))
         self.comboboxDelay.clear()
         self.comboboxDelay.addItems(map(str, settings.DELAYS))
         self.comboboxMetermode.clear()

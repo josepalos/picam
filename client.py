@@ -5,40 +5,47 @@ from io import BytesIO
 
 import numpy.lib.format
 
-import server
 import picam
 from camera import Image
 
 
-class CameraProxy:
-    def __init__(self, rpc_camera):
-        self._camera = rpc_camera  # type: server.CameraProxy
+def _unmarshall_image(image):
+    data = image.data
+    f = BytesIO(data)
+    return Image(numpy.lib.format.read_array(f))
+
+
+class _Proxy:
+    def __init__(self, original):
+        self._original = original
 
     def __getattr__(self, item):
-        # Proxy the attributes not defined here
-        return getattr(self._camera, item)
+        return getattr(self._original, item)
+
+
+class CameraProxy(_Proxy):
+    def __init__(self, rpc_camera):
+        super().__init__(rpc_camera)
 
     def preview(self):
-        self._camera.start_preview()
+        self._original.start_preview()
         while True:
-            f = BytesIO(self._camera.next_preview_frame().data)
-            next_frame = Image(numpy.lib.format.read_array(f))
-            yield next_frame
+            yield _unmarshall_image(self._original.next_preview_frame())
 
 
-class StorageProxy:
+class StorageProxy(_Proxy):
     def __init__(self, rpc_storage):
-        self._storage = rpc_storage  # type: server.StorageProxy
+        super().__init__(rpc_storage)
 
-    def __getattr__(self, item):
-        return getattr(self._storage, item)
+    def get_image(self, filename):
+        return _unmarshall_image(self._original.get_image(filename))
 
 
 def main(address, port):
     s = xmlrpc.client.ServerProxy(f"http://{address}:{port}")
 
     camera = CameraProxy(s.camera)  # type: CameraProxy
-    storage = s.storage  # type: StorageProxy
+    storage = StorageProxy(s.storage)  # type: StorageProxy
 
     camera.open()
     storage.start()

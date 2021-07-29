@@ -6,9 +6,9 @@ from subprocess import Popen, PIPE
 import sys
 
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget,
-                             QStackedWidget, QScroller, QGridLayout,
+                             QStackedWidget, QGridLayout,
                              QPushButton)
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QFile, QIODevice
+from PyQt5.QtCore import QTimer, pyqtSignal, QFile, QIODevice
 
 from picam.presets import Preset
 from . import mainwindow
@@ -18,11 +18,10 @@ from .storage import Storage
 from .camera import Camera, REAL_CAMERA, settings
 
 
-BASE_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
-IMAGES_DIRECTORY = os.path.realpath(
-    os.path.join(BASE_DIRECTORY, "..", "images"))
-PRESETS_DIRECTORY = os.path.realpath(
-    os.path.join(BASE_DIRECTORY, "..", "presets"))
+_FILE_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
+BASE_DIRECTORY = os.path.realpath(os.path.join(_FILE_DIRECTORY, ".."))
+IMAGES_DIRECTORY = os.path.join(BASE_DIRECTORY, "..", "images")
+PRESETS_DIRECTORY = os.path.join(BASE_DIRECTORY, "..", "presets")
 CAPTURE_PREVIEW_TIMEOUT = 5
 
 
@@ -345,7 +344,7 @@ def window(cam: Camera, storage: Storage):
 
 
 def load_stylesheet(app):
-    qss_file = QFile(os.path.join(BASE_DIRECTORY, "stylesheet.qss"))
+    qss_file = QFile(os.path.join(_FILE_DIRECTORY, "stylesheet.qss"))
     if not qss_file.open(QIODevice.ReadOnly | QIODevice.Text):
         logging.getLogger(__name__).warning("Could not load stylesheet")
         return

@@ -11,6 +11,13 @@ class NotAllowedException(Exception):
     pass
 
 
+def _marshall_image(image):
+    f = BytesIO()
+    numpy.lib.format.write_array(f, image._image)
+    val = f.getvalue()
+    return val
+
+
 class CameraProxy:
     def __init__(self, camera):
         self._camera = camera
@@ -38,17 +45,22 @@ class CameraProxy:
 
     def next_preview_frame(self):
         next_frame = next(self._preview_generator)
-        f = BytesIO()
-        numpy.lib.format.write_array(f, next_frame._image)
-        val = f.getvalue()
-        return val
+        return _marshall_image(next_frame)
 
     def preview(self):
         raise NotAllowedException
 
 
 class StorageProxy(Storage):
-    pass
+    def __init__(self, storage):
+        self._storage = storage
+
+    def __getattr__(self, item):
+        return getattr(self._storage, item)
+
+    def get_image(self, filename):
+        return _marshall_image(self._storage.get_image(filename))
+        
 
 
 class Wrapper:
@@ -60,7 +72,7 @@ class Wrapper:
         self.camera = CameraProxy(Camera(*args, **kwargs))
 
     def initialize_storage(self, *args, **kwargs):
-        self.storage = StorageProxy(*args, **kwargs)
+        self.storage = StorageProxy(Storage(*args, **kwargs))
 
 
 class RequestHandler(SimpleXMLRPCRequestHandler):
@@ -70,6 +82,7 @@ class RequestHandler(SimpleXMLRPCRequestHandler):
 def main(address, port, storage_path):
     with SimpleXMLRPCServer((address, port),
                             requestHandler=RequestHandler,
+                            logRequests=False,
                             allow_none=True) as server:
         server.register_introspection_functions()
 
@@ -79,4 +92,6 @@ def main(address, port, storage_path):
 
         server.register_instance(wrapper, allow_dotted_names=True)
 
+        print("Start listening...")
         server.serve_forever()
+
